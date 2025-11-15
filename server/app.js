@@ -723,30 +723,56 @@ export function createApp(store = new DataStore()) {
         const destinationChain = typeof body.destinationChain === 'string' ? body.destinationChain : sourceChain;
         const useCCTP = body.useCCTP === true || (sourceChain !== destinationChain);
 
-        if (!Number.isFinite(amount) || amount <= 0) {
-          sendJson(res, 400, { message: 'Send amount must be greater than zero' });
-          return;
-        }
-
-        if (!destinationAddress) {
-          sendJson(res, 400, { message: 'Destination address is required' });
-          return;
-        }
-
-        // Check chain balance
-        const sourceBalance = await store.getChainBalance(user.id, sourceChain);
-        if (sourceBalance < amount) {
-          sendJson(res, 400, { 
-            message: `Insufficient funds on ${sourceChain}. Available: ${sourceBalance.toFixed(2)} USDC` 
-          });
-          return;
-        }
+        // Start telemetry trace
+        const traceId = telemetryService ? telemetryService.startTrace('circle_transfer', { userId: user.id }) : null;
 
         try {
+          if (traceId && telemetryService) {
+            telemetryService.addSpan(traceId, 'validation_start');
+          }
+
+          if (!Number.isFinite(amount) || amount <= 0) {
+            sendJson(res, 400, { message: 'Send amount must be greater than zero' });
+            if (traceId && telemetryService) await telemetryService.endTrace(traceId, false, { error: 'invalid_amount' });
+            return;
+          }
+
+          if (!destinationAddress) {
+            sendJson(res, 400, { message: 'Destination address is required' });
+            if (traceId && telemetryService) await telemetryService.endTrace(traceId, false, { error: 'missing_address' });
+            return;
+          }
+
+          // Validate Circle API is configured
+          if (!process.env.CIRCLE_API_KEY) {
+            sendJson(res, 503, { 
+              message: 'Circle API not configured. Please add CIRCLE_API_KEY to environment variables.',
+              errorReason: 'missing_api_key',
+            });
+            if (traceId && telemetryService) await telemetryService.endTrace(traceId, false, { error: 'missing_api_key' });
+            return;
+          }
+
+          // Check chain balance (from our database, not Circle)
+          const sourceBalance = await store.getChainBalance(user.id, sourceChain);
+          if (sourceBalance < amount) {
+            sendJson(res, 400, { 
+              message: `Insufficient funds on ${sourceChain}. Available: ${sourceBalance.toFixed(2)} USDC` 
+            });
+            if (traceId && telemetryService) await telemetryService.endTrace(traceId, false, { error: 'insufficient_funds' });
+            return;
+          }
+
+          if (traceId && telemetryService) {
+            telemetryService.addSpan(traceId, 'circle_api_call_start');
+          }
+
           let transfer;
-          let settlementState = 'completed';
+          let settlementState = 'pending';
           
           if (useCCTP && sourceChain !== destinationChain) {
+            console.log(`[Circle] Initiating CCTP transfer: ${amount} USDC from ${sourceChain} to ${destinationChain}`);
+            
             // Use CCTP for cross-chain transfer
             transfer = await initiateCCTPTransfer(
               user.circleWalletId,
@@ -755,11 +781,19 @@ export function createApp(store = new DataStore()) {
               sourceChain,
               destinationChain
             );
+            
             settlementState = transfer.settlementState || 'burning';
+            console.log(`[Circle] CCTP transfer initiated:`, {
+              transferId: transfer.transferId,
+              settlementState,
+              burnTxHash: transfer.burnTxHash,
+            });
             
             // Update source chain balance (burn)
             await store.updateChainBalance(user.id, sourceChain, -amount);
           } else {
+            console.log(`[Circle] Creating same-chain transfer: ${amount} USDC on ${sourceChain}`);
+            
             // Regular same-chain transfer
             transfer = await createTransfer(
               user.circleWalletId,
@@ -768,12 +802,27 @@ export function createApp(store = new DataStore()) {
               sourceChain
             );
             
+            settlementState = transfer.status === 'COMPLETE' ? 'completed' : 'pending';
+            console.log(`[Circle] Transfer created:`, {
+              transferId: transfer.transferId,
+              status: transfer.status,
+              transactionHash: transfer.transactionHash,
+            });
+            
             // Update source chain balance
             await store.updateChainBalance(user.id, sourceChain, -amount);
           }
 
-          // Record transaction in our database with chain info
-          const updatedUser = await store.getUserById(user.id);
+          if (traceId && telemetryService) {
+            telemetryService.addSpan(traceId, 'circle_api_call_complete', { 
+              transferId: transfer.transferId,
+              settlementState,
+            });
+          }
+
+          // Record transaction in our database with ALL Circle data
+          const balanceAfter = await store.getChainBalance(user.id, sourceChain);
+          
           const transaction = await store.addTransaction({
             userId: user.id,
             type: 'send',
@@ -784,25 +833,60 @@ export function createApp(store = new DataStore()) {
             sourceChain,
             destinationChain,
             settlementState,
-            cctpTransferId: useCCTP ? transfer.transferId : undefined,
-            burnTxHash: transfer.burnTxHash || undefined,
-            mintTxHash: transfer.mintTxHash || undefined,
-            balanceAfter: await store.getChainBalance(user.id, sourceChain),
+            balanceAfter,
+            // Circle-specific data - REAL transaction hashes from Circle API
+            cctpTransferId: transfer.transferId,
+            burnTxHash: transfer.burnTxHash || transfer.transactionHash || null,
+            mintTxHash: transfer.mintTxHash || null,
+            attestation: transfer.attestation || null,
           });
 
+          if (traceId && telemetryService) {
+            telemetryService.addSpan(traceId, 'transaction_persisted', { transactionId: transaction.id });
+            await telemetryService.endTrace(traceId, true, {
+              transferId: transfer.transferId,
+              transactionId: transaction.id,
+              settlementState,
+            });
+          }
+
+          // Return REAL Circle data to frontend
           sendJson(res, 201, {
             transferId: transfer.transferId,
             status: transfer.status,
+            state: transfer.state,
             settlementState,
             sourceChain,
             destinationChain,
-            burnTxHash: transfer.burnTxHash || null,
+            // REAL blockchain transaction hashes from Circle
+            burnTxHash: transfer.burnTxHash || transfer.transactionHash || null,
             mintTxHash: transfer.mintTxHash || null,
+            attestation: transfer.attestation || null,
+            // Circle timestamps
+            createDate: transfer.createDate,
+            updateDate: transfer.updateDate,
+            // Error information
+            errorReason: transfer.errorReason || null,
+            // Our transaction record
             transaction: formatTransaction(transaction),
-            message: useCCTP ? 'Cross-chain transfer initiated via CCTP' : 'Transfer initiated',
+            message: useCCTP ? 'Cross-chain transfer initiated via CCTP' : 'Transfer initiated successfully',
           });
         } catch (error) {
-          sendJson(res, 500, { message: error.message });
+          console.error('[Circle] Transfer error:', error);
+          
+          if (traceId && telemetryService) {
+            await telemetryService.endTrace(traceId, false, { error: error.message });
+          }
+          
+          // Parse Circle API errors
+          const errorMessage = error.message || 'Failed to process transfer';
+          const errorReason = error.response?.data?.errorReason || error.response?.data?.code || 'unknown_error';
+          
+          sendJson(res, error.response?.status || 500, { 
+            message: errorMessage,
+            errorReason,
+            details: error.response?.data || null,
+          });
         }
         return;
       }

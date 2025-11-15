@@ -11,7 +11,7 @@ import KYCStatus from "@/components/KYCStatus";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { TrendingUp, Activity, PieChartIcon, Sparkles } from "lucide-react";
+import { TrendingUp, Activity, PieChartIcon, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { arcAPI, chainAPI, activityAPI } from "@/api/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -76,6 +76,8 @@ const Dashboard = () => {
   const [arcAnalytics, setArcAnalytics] = useState<ArcAnalytics | null>(null);
   const [arcLoading, setArcLoading] = useState(false);
   const [hasArcAccount, setHasArcAccount] = useState(false);
+  const [showAnalytics, setShowAnalytics] = useState(false);
+  const [showTransactions, setShowTransactions] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -235,15 +237,6 @@ const Dashboard = () => {
           
           <ActionButtons />
 
-          {/* KYC/KYB Status */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-          >
-            <KYCStatus />
-          </motion.div>
-
           {/* Arc Account Linkage */}
           {!hasArcAccount && (
             <motion.div
@@ -349,14 +342,26 @@ const Dashboard = () => {
             transition={{ delay: 0.4, duration: 0.5 }}
             className="space-y-6"
           >
-            <div className="flex items-center gap-3">
-              <motion.div
-                className="w-1.5 h-10 bg-gradient-to-b from-primary via-accent to-primary rounded-full"
-                animate={{ scaleY: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-              <h2 className="text-3xl font-bold text-arc-gradient">Financial Insights</h2>
-            </div>
+            <Card 
+              className="liquid-glass-premium border-0 shadow-xl cursor-pointer hover:shadow-2xl transition-shadow"
+              onClick={() => setShowAnalytics(!showAnalytics)}
+            >
+              <CardHeader className="py-4">
+                <CardTitle className="text-lg font-medium flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <TrendingUp className="h-5 w-5 text-muted-foreground" />
+                    Financial Insights
+                  </span>
+                  {showAnalytics ? (
+                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  )}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+
+            {showAnalytics && (
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Weekly Trend Chart */}
@@ -516,6 +521,7 @@ const Dashboard = () => {
                 </Card>
               </motion.div>
             </div>
+            )}
           </motion.div>
 
           {/* Recent Activity */}
@@ -526,16 +532,23 @@ const Dashboard = () => {
             className="hover-lift"
           >
             <Card className="liquid-glass-premium border-0 shadow-xl rounded-3xl overflow-hidden shimmer">
-              <CardHeader className="border-b border-white/10 bg-gradient-to-br from-primary/5 to-transparent">
-                <CardTitle className="text-2xl font-bold flex items-center gap-2">
-                  <motion.div
-                    className="w-1 h-8 bg-gradient-to-b from-primary to-accent rounded-full"
-                    animate={{ scaleY: [1, 1.2, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  />
-                  Recent Activity
+              <CardHeader 
+                className="cursor-pointer hover:bg-primary/5 transition-colors py-4"
+                onClick={() => setShowTransactions(!showTransactions)}
+              >
+                <CardTitle className="text-lg font-medium flex items-center justify-between">
+                  <span className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-muted-foreground" />
+                    Recent Activity
+                  </span>
+                  {showTransactions ? (
+                    <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                  )}
                 </CardTitle>
               </CardHeader>
+              {showTransactions && (
               <CardContent className="pt-6">
                 {loading ? (
                   <Loading text="Loading transactions..." />
@@ -566,7 +579,17 @@ const Dashboard = () => {
                   </motion.div>
                 )}
               </CardContent>
+              )}
             </Card>
+          </motion.div>
+
+          {/* Compliance & Verification - At the bottom */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+          >
+            <KYCStatus />
           </motion.div>
         </div>
       </main>

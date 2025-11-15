@@ -3,8 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ShieldCheck, AlertCircle, Clock, CheckCircle2, Upload, FileText } from "lucide-react";
-import { motion } from "framer-motion";
+import { ShieldCheck, AlertCircle, Clock, CheckCircle2, Upload, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
 
@@ -22,6 +22,7 @@ interface KYCStatusData {
 const KYCStatus = () => {
   const [status, setStatus] = useState<KYCStatusData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -102,6 +103,14 @@ const KYCStatus = () => {
     return null;
   }
 
+  const allVerified = status.kycStatus === 'verified' && 
+                      status.kybStatus === 'verified' && 
+                      status.sanctionsCheckStatus === 'clear';
+  
+  const hasIssues = status.kycStatus === 'rejected' || 
+                    status.kybStatus === 'rejected' || 
+                    status.sanctionsCheckStatus === 'flagged';
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -109,16 +118,34 @@ const KYCStatus = () => {
       transition={{ duration: 0.5 }}
     >
       <Card className="liquid-glass-premium border-0 shadow-xl">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShieldCheck className="h-6 w-6 text-primary" />
-            Verification Status
-          </CardTitle>
-          <CardDescription>
-            Your identity verification and compliance status
-          </CardDescription>
+        <CardHeader 
+          className="cursor-pointer hover:bg-primary/5 transition-colors py-4"
+          onClick={() => setIsExpanded(!isExpanded)}
+        >
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg font-medium flex items-center gap-2">
+              <ShieldCheck className={`h-5 w-5 ${allVerified ? 'text-success' : hasIssues ? 'text-destructive' : 'text-muted-foreground'}`} />
+              Compliance & Verification
+            </CardTitle>
+            <Button variant="ghost" size="sm">
+              {isExpanded ? (
+                <ChevronUp className="h-5 w-5 text-muted-foreground" />
+              ) : (
+                <ChevronDown className="h-5 w-5 text-muted-foreground" />
+              )}
+            </Button>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        
+        <AnimatePresence>
+          {isExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <CardContent className="space-y-4 pt-0">
           {status.requiresAction && (
             <Alert>
               <AlertCircle className="h-4 w-4" />
@@ -202,6 +229,9 @@ const KYCStatus = () => {
             </ul>
           </div>
         </CardContent>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </Card>
     </motion.div>
   );

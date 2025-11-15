@@ -20,6 +20,26 @@ async function startServer() {
     await initializeSchema();
     console.log('✅ Database ready');
 
+    // Check Circle API configuration
+    console.log('Checking Circle API configuration...');
+    const circleApiKey = process.env.CIRCLE_API_KEY;
+    if (!circleApiKey) {
+      console.warn('⚠️  CIRCLE_API_KEY not set - Circle features will not work');
+      console.warn('   To enable Circle Wallets and CCTP:');
+      console.warn('   1. Get an API key from https://console.circle.com/');
+      console.warn('   2. Create a .env file in the project root');
+      console.warn('   3. Add: CIRCLE_API_KEY=your_api_key_here');
+    } else {
+      console.log('✅ Circle API key found');
+      try {
+        const { checkCircleConnection } = await import('./circle.js');
+        await checkCircleConnection();
+      } catch (error) {
+        console.error('❌ Circle API connection failed:', error.message);
+        console.error('   Please verify your CIRCLE_API_KEY is valid');
+      }
+    }
+
     // Initialize store
     const store = new DatabaseStore();
     server = createApp(store);

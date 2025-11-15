@@ -31,6 +31,11 @@ const SendPayment = () => {
   const [paymentId, setPaymentId] = useState("");
   const [paymentState, setPaymentState] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [circleStatus, setCircleStatus] = useState<string>("");
+  const [circleState, setCircleState] = useState<string>("");
+  const [circleErrorReason, setCircleErrorReason] = useState<string | null>(null);
+  const [createDate, setCreateDate] = useState<string>("");
+  const [updateDate, setUpdateDate] = useState<string>("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { width, height } = useWindowSize();
@@ -106,12 +111,30 @@ const SendPayment = () => {
         note,
       });
 
-      setTransferId(response.data.transferId);
-      setSettlementState(response.data.settlementState || 'completed');
-      setBurnTxHash(response.data.burnTxHash || '');
-      setMintTxHash(response.data.mintTxHash || '');
-      setPaymentId(response.data.paymentId || '');
-      setPaymentState(response.data.paymentState || 'completed');
+      // Extract REAL Circle data from response
+      const data = response.data;
+      
+      setTransferId(data.transferId || "");
+      setSettlementState(data.settlementState || "pending");
+      setBurnTxHash(data.burnTxHash || "");
+      setMintTxHash(data.mintTxHash || "");
+      setPaymentId(data.paymentId || "");
+      setPaymentState(data.paymentState || "pending");
+      setCircleStatus(data.status || "");
+      setCircleState(data.state || "");
+      setCircleErrorReason(data.errorReason || null);
+      setCreateDate(data.createDate || "");
+      setUpdateDate(data.updateDate || "");
+
+      console.log('[Circle] Transfer response:', {
+        transferId: data.transferId,
+        status: data.status,
+        state: data.state,
+        settlementState: data.settlementState,
+        burnTxHash: data.burnTxHash,
+        mintTxHash: data.mintTxHash,
+        errorReason: data.errorReason,
+      });
 
       // Check if payment is completed immediately
       if (response.data.settlementState === 'completed' || response.data.paymentState === 'completed') {
@@ -252,11 +275,68 @@ const SendPayment = () => {
                       {recipient}
                     </p>
                     {transferId && (
-                      <div className="mt-4 p-3 bg-muted/50 rounded-lg space-y-2">
+                      <div className="mt-4 p-3 bg-muted/50 rounded-lg space-y-3">
                         <div>
-                          <p className="text-xs text-muted-foreground mb-1">Transfer ID:</p>
-                          <p className="text-xs font-mono break-all">{transferId}</p>
+                          <p className="text-xs text-muted-foreground mb-1">Circle Transfer ID:</p>
+                          <p className="text-xs font-mono break-all text-primary">{transferId}</p>
                         </div>
+                        
+                        {/* Circle Status & State */}
+                        {(circleStatus || circleState) && (
+                          <div className="flex gap-4 justify-center">
+                            {circleStatus && (
+                              <div className="text-center">
+                                <p className="text-xs text-muted-foreground">Status</p>
+                                <p className="text-sm font-semibold text-accent">{circleStatus}</p>
+                              </div>
+                            )}
+                            {circleState && (
+                              <div className="text-center">
+                                <p className="text-xs text-muted-foreground">State</p>
+                                <p className="text-sm font-semibold text-primary">{circleState}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                        
+                        {/* Transaction Hashes */}
+                        {burnTxHash && (
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Burn Transaction:</p>
+                            <a
+                              href={`https://sepolia.etherscan.io/tx/${burnTxHash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs font-mono text-blue-500 hover:text-blue-400 underline break-all"
+                            >
+                              {burnTxHash.substring(0, 20)}...
+                            </a>
+                          </div>
+                        )}
+                        
+                        {mintTxHash && (
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">Mint Transaction:</p>
+                            <a
+                              href={`https://sepolia.etherscan.io/tx/${mintTxHash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs font-mono text-green-500 hover:text-green-400 underline break-all"
+                            >
+                              {mintTxHash.substring(0, 20)}...
+                            </a>
+                          </div>
+                        )}
+                        
+                        {/* Error Reason */}
+                        {circleErrorReason && (
+                          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-2">
+                            <p className="text-xs text-red-400 mb-1">Error:</p>
+                            <p className="text-xs font-semibold text-red-300">{circleErrorReason}</p>
+                          </div>
+                        )}
+                        
+                        {/* Settlement Status for CCTP */}
                         {useCCTP && (
                           <SettlementStatus
                             state={settlementState}
