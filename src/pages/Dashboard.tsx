@@ -6,6 +6,7 @@ import ActionButtons from "@/components/ActionButtons";
 import TransactionItem from "@/components/TransactionItem";
 import Loading from "@/components/Loading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { motion } from "framer-motion";
 
 interface Transaction {
   id: string;
@@ -61,41 +62,75 @@ const Dashboard = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
       <Navbar />
       
       <main className="container mx-auto px-4 py-8 max-w-4xl">
-        <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground mb-2">Dashboard</h1>
-            <p className="text-muted-foreground">Manage your money with ease</p>
-          </div>
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#4A44F2] via-[#31D2F7] to-[#4A44F2] bg-clip-text text-transparent mb-2">
+            Dashboard
+          </h1>
+          <p className="text-muted-foreground text-lg">Manage your money with ease</p>
+        </motion.div>
 
+        <div className="space-y-8">
           <BalanceCard balance={balance} loading={loading} />
           
           <ActionButtons />
 
-          <Card className="shadow-card">
-            <CardHeader>
-              <CardTitle>Recent Activity</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <Loading text="Loading transactions..." />
-              ) : transactions.length > 0 ? (
-                <div className="space-y-3">
-                  {transactions.map((transaction) => (
-                    <TransactionItem key={transaction.id} {...transaction} />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-muted-foreground">
-                  <p>No transactions yet</p>
-                  <p className="text-sm mt-1">Start by adding money to your account</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            <Card className="backdrop-blur-sm bg-card/50 border border-border/50 shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                  <motion.div
+                    className="w-1 h-8 bg-gradient-to-b from-primary to-accent rounded-full"
+                    animate={{ scaleY: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                  Recent Activity
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <Loading text="Loading transactions..." />
+                ) : transactions.length > 0 ? (
+                  <div className="space-y-3">
+                    {transactions.map((transaction, index) => (
+                      <motion.div
+                        key={transaction.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5 + index * 0.1 }}
+                      >
+                        <TransactionItem {...transaction} />
+                      </motion.div>
+                    ))}
+                  </div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-center py-12"
+                  >
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center">
+                      <span className="text-3xl">💸</span>
+                    </div>
+                    <p className="text-muted-foreground text-lg">No transactions yet</p>
+                    <p className="text-sm text-muted-foreground mt-2">Start by adding money to your account</p>
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </main>
     </div>

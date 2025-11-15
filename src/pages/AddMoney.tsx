@@ -6,7 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import Navbar from "@/components/Navbar";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import Confetti from "react-confetti";
+import { useWindowSize } from "@/hooks/use-window-size";
 
 const AddMoney = () => {
   const [amount, setAmount] = useState("");
@@ -14,6 +17,7 @@ const AddMoney = () => {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { width, height } = useWindowSize();
 
   const quickAmounts = [50, 100, 250, 500];
 
@@ -42,113 +46,163 @@ const AddMoney = () => {
       
       setTimeout(() => {
         navigate('/dashboard');
-      }, 2000);
+      }, 3000);
     }, 1500);
   };
 
   if (success) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+        <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />
         <Navbar />
         <main className="container mx-auto px-4 py-8 max-w-md">
-          <Card className="shadow-elevated text-center">
-            <CardContent className="pt-12 pb-8">
-              <div className="mx-auto w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center mb-4">
-                <CheckCircle2 className="h-8 w-8 text-accent" />
-              </div>
-              <h2 className="text-2xl font-bold mb-2">Money Added!</h2>
-              <p className="text-muted-foreground mb-4">
-                ${parseFloat(amount).toFixed(2)} has been added to your account
-              </p>
-              <p className="text-sm text-muted-foreground">Redirecting to dashboard...</p>
-            </CardContent>
-          </Card>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 200 }}
+          >
+            <Card className="backdrop-blur-sm bg-card/80 border-0 shadow-2xl text-center overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#3CF276]/10 via-transparent to-[#31D2F7]/10" />
+              <CardContent className="pt-16 pb-12 relative">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1, rotate: 360 }}
+                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                  className="mx-auto w-24 h-24 bg-gradient-to-br from-[#3CF276] to-[#2AB55E] rounded-full flex items-center justify-center mb-6 shadow-xl"
+                >
+                  <CheckCircle2 className="h-12 w-12 text-white" />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <h2 className="text-3xl font-bold mb-3 bg-gradient-to-r from-[#3CF276] to-[#2AB55E] bg-clip-text text-transparent">
+                    Money Added!
+                  </h2>
+                  <div className="space-y-2 mb-6">
+                    <p className="text-5xl font-bold text-foreground">
+                      ${parseFloat(amount).toFixed(2)}
+                    </p>
+                    <p className="text-muted-foreground">has been added to your account</p>
+                  </div>
+                  <motion.div
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    <span>Redirecting to dashboard...</span>
+                  </motion.div>
+                </motion.div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
       <Navbar />
       
       <main className="container mx-auto px-4 py-8 max-w-md">
-        <Button
-          variant="ghost"
-          onClick={() => navigate('/dashboard')}
-          className="mb-6 gap-2"
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Dashboard
-        </Button>
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/dashboard')}
+            className="mb-6 gap-2 hover:bg-primary/10"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Dashboard
+          </Button>
+        </motion.div>
 
-        <Card className="shadow-elevated">
-          <CardHeader>
-            <CardTitle className="text-2xl">Add Money</CardTitle>
-            <CardDescription>Deposit funds to your account instantly</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-4">
-                <InputField
-                  label="Amount"
-                  type="number"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={setAmount}
-                  required
-                />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card className="backdrop-blur-sm bg-card/80 border-0 shadow-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#3CF276]/5 via-transparent to-[#31D2F7]/5" />
+            <CardHeader className="relative">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-[#3CF276] to-[#31D2F7] bg-clip-text text-transparent">
+                Add Money
+              </CardTitle>
+              <CardDescription className="text-base">Deposit funds to your account instantly</CardDescription>
+            </CardHeader>
+            <CardContent className="relative">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-5">
+                  <InputField
+                    label="Amount"
+                    type="number"
+                    placeholder="0.00"
+                    value={amount}
+                    onChange={setAmount}
+                    required
+                  />
 
-                <div className="space-y-2">
-                  <p className="text-sm font-medium">Quick amounts</p>
-                  <div className="grid grid-cols-4 gap-2">
-                    {quickAmounts.map((quickAmount) => (
-                      <Button
-                        key={quickAmount}
-                        type="button"
-                        variant="outline"
-                        onClick={() => setAmount(quickAmount.toString())}
-                        className="h-12"
-                      >
-                        ${quickAmount}
-                      </Button>
-                    ))}
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-foreground">Quick amounts</p>
+                    <div className="grid grid-cols-4 gap-3">
+                      {quickAmounts.map((quickAmount) => (
+                        <motion.div key={quickAmount} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setAmount(quickAmount.toString())}
+                            className="h-14 w-full font-bold border-2 hover:border-primary hover:bg-primary/10"
+                          >
+                            ${quickAmount}
+                          </Button>
+                        </motion.div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Deposit amount</span>
-                  <span className="font-medium">
-                    ${amount ? parseFloat(amount).toFixed(2) : '0.00'}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Processing fee</span>
-                  <span className="font-medium text-accent">Free</span>
-                </div>
-                <div className="h-px bg-border my-2" />
-                <div className="flex justify-between font-semibold">
-                  <span>You'll receive</span>
-                  <span>${amount ? parseFloat(amount).toFixed(2) : '0.00'}</span>
-                </div>
-              </div>
+                <Card className="bg-gradient-to-br from-muted/50 to-muted/30 border-0">
+                  <CardContent className="p-5 space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Deposit amount</span>
+                      <span className="font-bold">
+                        ${amount ? parseFloat(amount).toFixed(2) : '0.00'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Processing fee</span>
+                      <span className="font-bold text-[#3CF276]">Free</span>
+                    </div>
+                    <div className="h-px bg-border my-2" />
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>You'll receive</span>
+                      <span className="text-[#3CF276]">${amount ? parseFloat(amount).toFixed(2) : '0.00'}</span>
+                    </div>
+                  </CardContent>
+                </Card>
 
-              <Button 
-                type="submit" 
-                className="w-full h-12 text-base font-semibold bg-accent hover:bg-accent/90"
-                disabled={loading}
-              >
-                {loading ? <Loading text="" /> : "Add Money"}
-              </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-14 text-base font-bold bg-gradient-to-r from-[#3CF276] to-[#2AB55E] hover:from-[#2AB55E] hover:to-[#3CF276] border-0 shadow-xl"
+                    disabled={loading}
+                  >
+                    {loading ? <Loading text="" /> : "Add Money"}
+                  </Button>
+                </motion.div>
 
-              <p className="text-xs text-center text-muted-foreground">
-                Funds will be available instantly in your account
-              </p>
-            </form>
-          </CardContent>
-        </Card>
+                <p className="text-xs text-center text-muted-foreground">
+                  💡 Funds will be available instantly in your account
+                </p>
+              </form>
+            </CardContent>
+          </Card>
+        </motion.div>
       </main>
     </div>
   );
