@@ -7,6 +7,7 @@ import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import { Wallet } from "lucide-react";
 import { motion } from "framer-motion";
+import { authAPI } from "@/api/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -19,15 +20,26 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      localStorage.setItem('authToken', 'demo-token-' + Date.now());
+    try {
+      const response = await authAPI.login({
+        email,
+        password
+      });
+
+      localStorage.setItem('authToken', response.data.token);
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
       navigate('/dashboard');
-    }, 1000);
+    } catch (error: any) {
+      setLoading(false);
+      toast({
+        title: "Login failed",
+        description: error.response?.data?.error || "Invalid email or password.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

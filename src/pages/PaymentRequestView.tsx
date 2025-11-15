@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/use-window-size";
 import ArcFinalityAnimation from "@/components/ArcFinalityAnimation";
+import { walletAPI } from "@/api/client";
 
 const PaymentRequestView = () => {
   const { requestId } = useParams();
@@ -18,26 +19,44 @@ const PaymentRequestView = () => {
   const { toast } = useToast();
   const { width, height } = useWindowSize();
 
-  // Mock data - in real app, fetch from API using requestId
-  const requestData = {
+  const [requestData, setRequestData] = useState({
     amount: 150.00,
     note: "Dinner split from last night",
     requestedBy: "John Smith",
     requestedByEmail: "john@example.com",
-  };
+  });
+
+  useEffect(() => {
+    // In production, fetch payment request from API using requestId
+    // For now, using mock data
+  }, [requestId]);
 
   const handlePayment = async () => {
     setLoading(true);
 
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
+      // Send payment to requester
+      const response = await walletAPI.send({
+        recipient: requestData.requestedByEmail,
+        amount: requestData.amount,
+        note: requestData.note || `Payment for request ${requestId}`
+      });
+
       setLoading(false);
       setSuccess(true);
+      
       toast({
         title: "Payment sent",
-        description: `$${requestData.amount.toFixed(2)} sent to ${requestData.requestedBy}`,
+        description: `$${requestData.amount.toFixed(2)} sent to ${requestData.requestedBy}. New balance: $${response.data.newBalance.toFixed(2)}`,
       });
-    }, 2000);
+    } catch (error: any) {
+      setLoading(false);
+      toast({
+        title: "Failed to send payment",
+        description: error.response?.data?.error || "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (success) {

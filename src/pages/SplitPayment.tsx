@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/use-window-size";
 import ArcFinalityAnimation from "@/components/ArcFinalityAnimation";
+import { walletAPI } from "@/api/client";
 
 interface Participant {
   id: string;
@@ -102,11 +103,34 @@ const SplitPayment = () => {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Send payments to each participant
+      const splitParticipants = calculateSplit();
+      const paymentPromises = splitParticipants.map(participant =>
+        walletAPI.send({
+          recipient: participant.name,
+          amount: participant.amount,
+          note: `Split payment: ${participant.amount.toFixed(2)} of ${totalAmount}`
+        })
+      );
+
+      await Promise.all(paymentPromises);
+      
       setLoading(false);
       setSuccess(true);
-    }, 1500);
+      
+      toast({
+        title: "Split payment sent",
+        description: `$${parseFloat(totalAmount).toFixed(2)} split between ${participants.length} people`,
+      });
+    } catch (error: any) {
+      setLoading(false);
+      toast({
+        title: "Failed to send split payment",
+        description: error.response?.data?.error || "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (success) {

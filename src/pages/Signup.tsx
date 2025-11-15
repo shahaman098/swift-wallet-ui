@@ -7,6 +7,7 @@ import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import { Wallet } from "lucide-react";
 import { motion } from "framer-motion";
+import { authAPI } from "@/api/client";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -31,15 +32,47 @@ const Signup = () => {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      localStorage.setItem('authToken', 'demo-token-' + Date.now());
+    try {
+      const response = await authAPI.signup({
+        name,
+        email,
+        password
+      });
+
+      localStorage.setItem('authToken', response.data.token);
       toast({
         title: "Account created",
         description: "Welcome to PayWallet!",
       });
       navigate('/dashboard');
-    }, 1000);
+    } catch (error: any) {
+      setLoading(false);
+      console.error('Signup error details:', error);
+      
+      // Extract error message
+      let errorMessage = "Please try again.";
+      let errorTitle = "Signup failed";
+      
+      // Handle network errors
+      if (error.networkError || !error.response) {
+        errorTitle = "Connection Error";
+        errorMessage = "Cannot connect to server. Please make sure:\n• Backend server is running (port 3000)\n• MongoDB is running\n• Check browser console for details";
+      } else if (error.response?.data?.error) {
+        if (Array.isArray(error.response.data.error)) {
+          errorMessage = error.response.data.error.map((e: any) => e.message || e).join(', ');
+        } else {
+          errorMessage = error.response.data.error;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast({
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
   };
 
   return (

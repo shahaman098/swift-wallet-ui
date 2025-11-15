@@ -11,6 +11,7 @@ import { ArrowLeft, CheckCircle2, Sparkles, Send as SendIcon } from "lucide-reac
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/use-window-size";
+import { walletAPI } from "@/api/client";
 
 const SendPayment = () => {
   const [recipient, setRecipient] = useState("");
@@ -45,19 +46,34 @@ const SendPayment = () => {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Call actual API
+      const response = await walletAPI.send({
+        recipient,
+        amount: parseFloat(amount),
+        note: note || undefined
+      });
+
       setLoading(false);
       setSuccess(true);
+      
       toast({
         title: "Payment sent",
-        description: `$${parseFloat(amount).toFixed(2)} sent to ${recipient}`,
+        description: `$${parseFloat(amount).toFixed(2)} sent to ${recipient}. New balance: $${response.data.newBalance.toFixed(2)}`,
       });
       
       setTimeout(() => {
         navigate('/dashboard');
       }, 3000);
-    }, 1500);
+    } catch (error: any) {
+      setLoading(false);
+      const errorMessage = error.response?.data?.error || "Please try again.";
+      toast({
+        title: "Failed to send payment",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    }
   };
 
   if (success) {

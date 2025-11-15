@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import BalanceCard from "@/components/BalanceCard";
 import ActionButtons from "@/components/ActionButtons";
@@ -9,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { TrendingUp, Activity, PieChartIcon } from "lucide-react";
+import { walletAPI, activityAPI } from "@/api/client";
 
 interface Transaction {
   id: string;
@@ -55,36 +57,64 @@ const Dashboard = () => {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      setBalance(1234.56);
-      setTransactions([
-        {
-          id: '1',
-          type: 'deposit',
-          amount: 500.00,
-          date: 'Today, 2:30 PM',
-          status: 'completed',
-        },
-        {
-          id: '2',
-          type: 'send',
-          amount: 150.00,
-          recipient: 'John Smith',
-          date: 'Yesterday, 4:15 PM',
-          status: 'completed',
-        },
-        {
-          id: '3',
-          type: 'deposit',
-          amount: 1000.00,
-          date: 'Dec 10, 10:00 AM',
-          status: 'completed',
-        },
-      ]);
-      setLoading(false);
-    }, 800);
+    loadData();
+    
+    // Refresh data when returning to dashboard
+    const handleFocus = () => {
+      loadData();
+    };
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [navigate]);
+
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      
+      // Load balance
+      const balanceResponse = await walletAPI.getBalance();
+      setBalance(balanceResponse.data.balance || 0);
+
+      // Load transactions
+      const activityResponse = await activityAPI.getActivity({ limit: 5 });
+      const formattedTransactions = (activityResponse.data.transactions || []).map((tx: any) => ({
+        id: tx.id,
+        type: tx.type,
+        amount: tx.amount,
+        recipient: tx.recipient,
+        date: formatDate(tx.date),
+        status: tx.status,
+      }));
+      setTransactions(formattedTransactions);
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+      // Set defaults on error
+      setBalance(0);
+      setTransactions([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (days === 0) {
+      return `Today, ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+    } else if (days === 1) {
+      return `Yesterday, ${date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`;
+    } else if (days < 7) {
+      return `${days} days ago`;
+    } else {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 relative overflow-hidden">
@@ -362,6 +392,15 @@ const Dashboard = () => {
                         <TransactionItem {...transaction} />
                       </motion.div>
                     ))}
+                    <div className="pt-4 border-t border-white/10">
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => navigate('/transactions')}
+                      >
+                        View All Transactions
+                      </Button>
+                    </div>
                   </div>
                 ) : (
                   <motion.div

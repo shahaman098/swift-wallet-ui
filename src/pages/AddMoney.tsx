@@ -11,6 +11,7 @@ import { ArrowLeft, CheckCircle2, Sparkles, Network } from "lucide-react";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/use-window-size";
+import { walletAPI } from "@/api/client";
 
 const AddMoney = () => {
   const [amount, setAmount] = useState("");
@@ -36,19 +37,31 @@ const AddMoney = () => {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Call actual API
+      const response = await walletAPI.deposit({
+        amount: parseFloat(amount)
+      });
+
       setLoading(false);
       setSuccess(true);
+      
       toast({
         title: "Money added successfully",
-        description: `$${parseFloat(amount).toFixed(2)} has been added to your account.`,
+        description: `$${parseFloat(amount).toFixed(2)} has been added to your account. New balance: $${response.data.newBalance.toFixed(2)}`,
       });
       
       setTimeout(() => {
         navigate('/dashboard');
       }, 3000);
-    }, 1500);
+    } catch (error: any) {
+      setLoading(false);
+      toast({
+        title: "Failed to add money",
+        description: error.response?.data?.error || "Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (success) {

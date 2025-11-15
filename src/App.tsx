@@ -11,6 +11,13 @@ import SendPayment from "./pages/SendPayment";
 import SplitPayment from "./pages/SplitPayment";
 import RequestPayment from "./pages/RequestPayment";
 import PaymentRequestView from "./pages/PaymentRequestView";
+import TreasuryDashboard from "./pages/TreasuryDashboard";
+import CreateOrg from "./pages/CreateOrg";
+import CreateDepartment from "./pages/CreateDepartment";
+import TreasuryRules from "./pages/TreasuryRules";
+import TreasuryAutomation from "./pages/TreasuryAutomation";
+import TreasuryAnalytics from "./pages/TreasuryAnalytics";
+import TransactionHistory from "./pages/TransactionHistory";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +38,13 @@ const App = () => (
           <Route path="/split-payment" element={<SplitPayment />} />
           <Route path="/request-payment" element={<RequestPayment />} />
           <Route path="/pay/:requestId" element={<PaymentRequestView />} />
+          <Route path="/treasury" element={<TreasuryDashboard />} />
+          <Route path="/treasury/create-org" element={<CreateOrg />} />
+          <Route path="/treasury/create-department" element={<CreateDepartment />} />
+          <Route path="/treasury/rules" element={<TreasuryRules />} />
+          <Route path="/treasury/automation" element={<TreasuryAutomation />} />
+          <Route path="/treasury/analytics" element={<TreasuryAnalytics />} />
+          <Route path="/transactions" element={<TransactionHistory />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
