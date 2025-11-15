@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,20 +7,50 @@ import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import Navbar from "@/components/Navbar";
 import ArcFinalityAnimation from "@/components/ArcFinalityAnimation";
+import ChainSelector from "@/components/ChainSelector";
+import SettlementStatus from "@/components/SettlementStatus";
 import { ArrowLeft, CheckCircle2, Sparkles, Send as SendIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/use-window-size";
+import { circleAPI } from "@/api/client";
 
 const SendPayment = () => {
   const [recipient, setRecipient] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [blockchain, setBlockchain] = useState("ETH-SEPOLIA");
+  const [destinationChain, setDestinationChain] = useState("ETH-SEPOLIA");
+  const [useCCTP, setUseCCTP] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [transferId, setTransferId] = useState("");
+  const [settlementState, setSettlementState] = useState("");
+  const [burnTxHash, setBurnTxHash] = useState("");
+  const [mintTxHash, setMintTxHash] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { width, height } = useWindowSize();
+
+
+  useEffect(() => {
+    // Ensure wallet exists on mount
+    const ensureWallet = async () => {
+      try {
+        await circleAPI.createWallet();
+      } catch (error) {
+        // Wallet might already exist, that's okay
+      }
+    };
+    ensureWallet();
+  }, []);
+
+  useEffect(() => {
+    // Auto-enable CCTP if chains are different
+    if (blockchain !== destinationChain) {
+      setUseCCTP(true);
+    }
+  }, [blockchain, destinationChain]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +67,17 @@ const SendPayment = () => {
     if (!recipient) {
       toast({
         title: "Recipient required",
-        description: "Please enter a recipient email or username.",
+        description: "Please enter a recipient wallet address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Basic address validation (should start with 0x for EVM chains)
+    if (!recipient.startsWith('0x') || recipient.length !== 42) {
+      toast({
+        title: "Invalid address",
+        description: "Please enter a valid blockchain address (0x...).",
         variant: "destructive",
       });
       return;
@@ -45,19 +85,81 @@ const SendPayment = () => {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      // Ensure wallet exists
+      try {
+        await circleAPI.createWallet();
+      } catch (error) {
+        // Wallet might already exist
+      }
+
+      // Send payment via Circle
+      const response = await circleAPI.send({
+        amount: parseFloat(amount),
+        destinationAddress: recipient,
+        sourceChain: blockchain,
+        destinationChain: useCCTP ? destinationChain : blockchain,
+        useCCTP: useCCTP && blockchain !== destinationChain,
+        note,
+      });
+
+      setTransferId(response.data.transferId);
+      setSettlementState(response.data.settlementState || 'completed');
+      setBurnTxHash(response.data.burnTxHash || '');
+      setMintTxHash(response.data.mintTxHash || '');
       setSuccess(true);
+
+      // Poll for settlement status if cross-chain
+      if (useCCTP && blockchain !== destinationChain && response.data.transferId) {
+        pollSettlementStatus(response.data.transferId);
+      }
+      
       toast({
         title: "Payment sent",
-        description: `$${parseFloat(amount).toFixed(2)} sent to ${recipient}`,
+        description: useCCTP 
+          ? `$${parseFloat(amount).toFixed(2)} USDC sent via CCTP cross-chain transfer`
+          : `$${parseFloat(amount).toFixed(2)} USDC sent to ${recipient.substring(0, 6)}...${recipient.substring(38)}`,
       });
       
       setTimeout(() => {
         navigate('/dashboard');
       }, 3000);
-    }, 1500);
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || "Failed to send payment";
+      toast({
+        title: "Payment failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
+  };
+
+  const pollSettlementStatus = async (transferId: string) => {
+    const maxAttempts = 30;
+    let attempts = 0;
+
+    const poll = async () => {
+      if (attempts >= maxAttempts) return;
+
+      try {
+        const response = await circleAPI.getTransferStatus(transferId);
+        setSettlementState(response.data.settlementState);
+        setBurnTxHash(response.data.burnTxHash || '');
+        setMintTxHash(response.data.mintTxHash || '');
+
+        if (response.data.settlementState === 'completed' || response.data.settlementState === 'failed') {
+          return; // Stop polling
+        }
+
+        attempts++;
+        setTimeout(poll, 3000); // Poll every 3 seconds
+      } catch (error) {
+        console.error('Failed to poll settlement status:', error);
+      }
+    };
+
+    setTimeout(poll, 2000); // Start polling after 2 seconds
   };
 
   if (success) {
@@ -94,8 +196,27 @@ const SendPayment = () => {
                     <p className="text-5xl font-bold text-foreground">
                       ${parseFloat(amount).toFixed(2)}
                     </p>
-                    <p className="text-muted-foreground">sent to</p>
-                    <p className="font-bold text-xl text-foreground">{recipient}</p>
+                    <p className="text-muted-foreground">USDC sent to</p>
+                    <p className="font-bold text-sm text-foreground break-all">
+                      {recipient}
+                    </p>
+                    {transferId && (
+                      <div className="mt-4 p-3 bg-muted/50 rounded-lg space-y-2">
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">Transfer ID:</p>
+                          <p className="text-xs font-mono break-all">{transferId}</p>
+                        </div>
+                        {useCCTP && (
+                          <SettlementStatus
+                            state={settlementState}
+                            sourceChain={blockchain}
+                            destinationChain={destinationChain}
+                            burnTxHash={burnTxHash}
+                            mintTxHash={mintTxHash}
+                          />
+                        )}
+                      </div>
+                    )}
                   </div>
                   {note && (
                     <div className="bg-muted/50 rounded-xl p-4 mb-6">
@@ -150,27 +271,61 @@ const SendPayment = () => {
                 <SendIcon className="h-8 w-8" />
                 Send Payment
               </CardTitle>
-              <CardDescription className="text-base">Transfer money via Gateway instantly</CardDescription>
+              <CardDescription className="text-base">Transfer USDC via Circle CCTP</CardDescription>
             </CardHeader>
             <CardContent className="relative">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
                   <InputField
-                    label="Recipient"
-                    placeholder="Email or username"
+                    label="Recipient Address"
+                    placeholder="0x..."
                     value={recipient}
                     onChange={setRecipient}
                     required
                   />
 
                   <InputField
-                    label="Amount"
+                    label="Amount (USDC)"
                     type="number"
                     placeholder="0.00"
                     value={amount}
                     onChange={setAmount}
                     required
+                    step="0.01"
+                    min="0.01"
                   />
+
+                  <ChainSelector
+                    value={blockchain}
+                    onChange={setBlockchain}
+                    label="Source Blockchain"
+                  />
+
+                  <ChainSelector
+                    value={destinationChain}
+                    onChange={setDestinationChain}
+                    label="Destination Blockchain"
+                  />
+
+                  {blockchain !== destinationChain && (
+                    <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <input
+                          type="checkbox"
+                          id="useCCTP"
+                          checked={useCCTP}
+                          onChange={(e) => setUseCCTP(e.target.checked)}
+                          className="rounded"
+                        />
+                        <label htmlFor="useCCTP" className="text-sm font-semibold">
+                          Use CCTP for Cross-Chain Transfer
+                        </label>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Enable Circle's Cross-Chain Transfer Protocol to send USDC across different blockchains.
+                      </p>
+                    </div>
+                  )}
 
                   <InputField
                     label="Note (Optional)"
@@ -190,8 +345,16 @@ const SendPayment = () => {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Transfer fee</span>
-                      <span className="font-bold text-[#3CF276]">Free</span>
+                      <span className="font-bold text-[#3CF276]">
+                        {useCCTP ? "CCTP Fee" : "Network Fee"}
+                      </span>
                     </div>
+                    {useCCTP && (
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Cross-chain via CCTP</span>
+                        <span>{blockchain} → {destinationChain}</span>
+                      </div>
+                    )}
                     <div className="h-px bg-border my-2" />
                     <div className="flex justify-between font-bold text-lg">
                       <span>Total</span>

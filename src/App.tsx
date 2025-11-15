@@ -11,6 +11,10 @@ import SendPayment from "./pages/SendPayment";
 import SplitPayment from "./pages/SplitPayment";
 import RequestPayment from "./pages/RequestPayment";
 import PaymentRequestView from "./pages/PaymentRequestView";
+import SmartContractWallets from "./pages/SmartContractWallets";
+import TreasuryAutomation from "./pages/TreasuryAutomation";
+import PolicyManagement from "./pages/PolicyManagement";
+import TreasuryOperations from "./pages/TreasuryOperations";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +35,10 @@ const App = () => (
           <Route path="/split-payment" element={<SplitPayment />} />
           <Route path="/request-payment" element={<RequestPayment />} />
           <Route path="/pay/:requestId" element={<PaymentRequestView />} />
+          <Route path="/smart-contracts" element={<SmartContractWallets />} />
+          <Route path="/treasury-automation" element={<TreasuryAutomation />} />
+          <Route path="/policy-management" element={<PolicyManagement />} />
+          <Route path="/treasury-operations" element={<TreasuryOperations />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

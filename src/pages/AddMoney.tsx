@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,20 +7,37 @@ import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import Navbar from "@/components/Navbar";
 import ArcFinalityAnimation from "@/components/ArcFinalityAnimation";
-import { ArrowLeft, CheckCircle2, Sparkles, Network } from "lucide-react";
+import ChainSelector from "@/components/ChainSelector";
+import { ArrowLeft, CheckCircle2, Sparkles, Network, Copy, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/use-window-size";
+import { circleAPI } from "@/api/client";
 
 const AddMoney = () => {
   const [amount, setAmount] = useState("");
+  const [blockchain, setBlockchain] = useState("ETH-SEPOLIA");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [depositAddress, setDepositAddress] = useState("");
+  const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { width, height } = useWindowSize();
 
   const quickAmounts = [50, 100, 250, 500];
+
+  useEffect(() => {
+    // Ensure wallet exists on mount
+    const ensureWallet = async () => {
+      try {
+        await circleAPI.createWallet();
+      } catch (error) {
+        // Wallet might already exist, that's okay
+      }
+    };
+    ensureWallet();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,19 +53,48 @@ const AddMoney = () => {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(true);
-      toast({
-        title: "Money added successfully",
-        description: `$${parseFloat(amount).toFixed(2)} has been added to your account.`,
+    try {
+      // Ensure wallet exists
+      try {
+        await circleAPI.createWallet();
+      } catch (error) {
+        // Wallet might already exist
+      }
+
+      // Create deposit address via Circle
+      const response = await circleAPI.deposit({
+        amount: parseFloat(amount),
+        blockchain,
       });
+
+      setDepositAddress(response.data.depositAddress);
+      setSuccess(true);
       
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 3000);
-    }, 1500);
+      toast({
+        title: "Deposit address created",
+        description: "Send USDC to the address below. Your balance will update once confirmed.",
+      });
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || error.message || "Failed to create deposit address";
+      toast({
+        title: "Deposit failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setLoading(false);
+    }
+  };
+
+  const copyToClipboard = () => {
+    if (depositAddress) {
+      navigator.clipboard.writeText(depositAddress);
+      setCopied(true);
+      toast({
+        title: "Copied!",
+        description: "Deposit address copied to clipboard",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   if (success) {
@@ -73,21 +119,58 @@ const AddMoney = () => {
                   className="mt-8"
                 >
                   <h2 className="text-3xl font-bold mb-3 text-arc-gradient">
-                    Money Added!
+                    Deposit Address Ready!
                   </h2>
-                  <div className="space-y-2 mb-6">
-                    <p className="text-5xl font-bold text-foreground">
-                      ${parseFloat(amount).toFixed(2)}
+                  <div className="space-y-4 mb-6">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Send USDC to:</p>
+                      <div className="bg-muted/50 rounded-lg p-4 flex items-center gap-2">
+                        <code className="flex-1 text-xs break-all text-left">
+                          {depositAddress}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={copyToClipboard}
+                          className="shrink-0"
+                        >
+                          {copied ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      <p>Amount: <span className="font-bold text-foreground">${parseFloat(amount).toFixed(2)} USDC</span></p>
+                      <p>Network: <span className="font-bold text-foreground">{blockchain}</span></p>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Your balance will update automatically once the transaction is confirmed on the blockchain.
                     </p>
-                    <p className="text-muted-foreground">has been added to your account</p>
                   </div>
-                  <Button
-                    onClick={() => navigate("/dashboard")}
-                    className="mt-4 px-8"
-                    size="lg"
-                  >
-                    Back to Dashboard
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => navigate("/dashboard")}
+                      className="flex-1"
+                      size="lg"
+                    >
+                      Back to Dashboard
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setSuccess(false);
+                        setDepositAddress("");
+                        setAmount("");
+                      }}
+                      variant="outline"
+                      className="flex-1"
+                      size="lg"
+                    >
+                      New Deposit
+                    </Button>
+                  </div>
                 </motion.div>
               </CardContent>
             </Card>
@@ -127,18 +210,26 @@ const AddMoney = () => {
                 <Network className="h-8 w-8" />
                 Add Money
               </CardTitle>
-              <CardDescription className="text-base">Deposit funds via CCTP instantly</CardDescription>
+              <CardDescription className="text-base">Deposit USDC via Circle CCTP</CardDescription>
             </CardHeader>
             <CardContent className="relative">
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-5">
+                  <ChainSelector
+                    value={blockchain}
+                    onChange={setBlockchain}
+                    label="Blockchain Network"
+                  />
+
                   <InputField
-                    label="Amount"
+                    label="Amount (USDC)"
                     type="number"
                     placeholder="0.00"
                     value={amount}
                     onChange={setAmount}
                     required
+                    step="0.01"
+                    min="0.01"
                   />
 
                   <div className="space-y-3">

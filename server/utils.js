@@ -42,6 +42,44 @@ export function formatTransaction(transaction) {
     formatted.note = transaction.note;
   }
 
+  // Chain information
+  if (transaction.chainKey) {
+    formatted.chainKey = transaction.chainKey;
+  }
+
+  if (transaction.sourceChain) {
+    formatted.sourceChain = transaction.sourceChain;
+  }
+
+  if (transaction.destinationChain) {
+    formatted.destinationChain = transaction.destinationChain;
+  }
+
+  // Settlement state for cross-chain transfers
+  if (transaction.settlementState) {
+    formatted.settlementState = transaction.settlementState;
+  }
+
+  if (transaction.cctpTransferId) {
+    formatted.cctpTransferId = transaction.cctpTransferId;
+  }
+
+  if (transaction.burnTxHash) {
+    formatted.burnTxHash = transaction.burnTxHash;
+  }
+
+  if (transaction.mintTxHash) {
+    formatted.mintTxHash = transaction.mintTxHash;
+  }
+
+  if (transaction.attestation) {
+    formatted.attestation = transaction.attestation;
+  }
+
+  if (transaction.updatedAt) {
+    formatted.updatedAt = transaction.updatedAt;
+  }
+
   return formatted;
 }
 

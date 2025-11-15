@@ -2,13 +2,17 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import BalanceCard from "@/components/BalanceCard";
+import MultiChainBalance from "@/components/MultiChainBalance";
 import ActionButtons from "@/components/ActionButtons";
 import TransactionItem from "@/components/TransactionItem";
+import ArcAccountLink from "@/components/ArcAccountLink";
 import Loading from "@/components/Loading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { TrendingUp, Activity, PieChartIcon } from "lucide-react";
+import { TrendingUp, Activity, PieChartIcon, Sparkles } from "lucide-react";
+import { arcAPI, chainAPI, activityAPI } from "@/api/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface Transaction {
   id: string;
@@ -17,6 +21,12 @@ interface Transaction {
   recipient?: string;
   date: string;
   status: 'completed' | 'pending';
+  chainKey?: string;
+  sourceChain?: string;
+  destinationChain?: string;
+  settlementState?: string;
+  burnTxHash?: string;
+  mintTxHash?: string;
 }
 
 // Chart data
@@ -42,11 +52,31 @@ const monthlyData = [
   { month: 'Mar', income: 2500, expenses: 1265.44 },
 ];
 
+interface ArcAnalytics {
+  timeframe: string;
+  transactions: {
+    total: number;
+    count: number;
+    average: number;
+  };
+  volume: {
+    total: number;
+    incoming: number;
+    outgoing: number;
+  };
+  trends: Array<{ date: string; value: number }>;
+  insights: Array<{ type: string; message: string }>;
+}
+
 const Dashboard = () => {
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [arcAnalytics, setArcAnalytics] = useState<ArcAnalytics | null>(null);
+  const [arcLoading, setArcLoading] = useState(false);
+  const [hasArcAccount, setHasArcAccount] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -55,36 +85,78 @@ const Dashboard = () => {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      setBalance(1234.56);
-      setTransactions([
-        {
-          id: '1',
-          type: 'deposit',
-          amount: 500.00,
-          date: 'Today, 2:30 PM',
-          status: 'completed',
-        },
-        {
-          id: '2',
-          type: 'send',
-          amount: 150.00,
-          recipient: 'John Smith',
-          date: 'Yesterday, 4:15 PM',
-          status: 'completed',
-        },
-        {
-          id: '3',
-          type: 'deposit',
-          amount: 1000.00,
-          date: 'Dec 10, 10:00 AM',
-          status: 'completed',
-        },
-      ]);
-      setLoading(false);
-    }, 800);
+    loadDashboardData();
+    checkArcAccount();
   }, [navigate]);
+
+  const loadDashboardData = async () => {
+    try {
+      // Load multi-chain balances
+      const balanceResponse = await chainAPI.getBalance();
+      const totalBalance = balanceResponse.data.totalBalance || 0;
+      setBalance(totalBalance);
+
+      // Load transactions
+      const activityResponse = await activityAPI.getActivity({ limit: 20 });
+      const txns = activityResponse.data.transactions || [];
+      
+      // Format transactions with chain info
+      const formattedTransactions = txns.map((tx: any) => ({
+        id: tx.id,
+        type: tx.type,
+        amount: tx.amount,
+        recipient: tx.recipient,
+        date: new Date(tx.createdAt).toLocaleString(),
+        status: tx.settlementState === 'completed' ? 'completed' : 'pending',
+        chainKey: tx.chainKey,
+        sourceChain: tx.sourceChain,
+        destinationChain: tx.destinationChain,
+        settlementState: tx.settlementState,
+        burnTxHash: tx.burnTxHash,
+        mintTxHash: tx.mintTxHash,
+      }));
+
+      setTransactions(formattedTransactions);
+      setLoading(false);
+    } catch (error) {
+      console.error('Failed to load dashboard data:', error);
+      // Fallback to mock data
+      setBalance(1234.56);
+      setTransactions([]);
+      setLoading(false);
+    }
+  };
+
+  const checkArcAccount = async () => {
+    try {
+      await arcAPI.getAccount();
+      setHasArcAccount(true);
+      loadArcAnalytics();
+    } catch (error: any) {
+      if (error.response?.status !== 404) {
+        // Only set to false if it's a 404, otherwise might be other error
+        setHasArcAccount(false);
+      }
+    }
+  };
+
+  const loadArcAnalytics = async () => {
+    setArcLoading(true);
+    try {
+      const response = await arcAPI.getAnalytics('30d');
+      setArcAnalytics(response.data);
+      
+      // Track dashboard view event
+      await arcAPI.trackEvent('dashboard_viewed', {
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error: any) {
+      // Analytics might not be available yet
+      console.log('Arc analytics not available:', error.message);
+    } finally {
+      setArcLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 relative overflow-hidden">
@@ -151,7 +223,114 @@ const Dashboard = () => {
         <div className="space-y-8">
           <BalanceCard balance={balance} loading={loading} />
           
+          {/* Multi-Chain Balances */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <MultiChainBalance />
+          </motion.div>
+          
           <ActionButtons />
+
+          {/* Arc Account Linkage */}
+          {!hasArcAccount && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <ArcAccountLink />
+            </motion.div>
+          )}
+
+          {/* Arc Analytics Section */}
+          {hasArcAccount && arcAnalytics && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center gap-3">
+                <motion.div
+                  className="w-1.5 h-10 bg-gradient-to-b from-primary via-accent to-primary rounded-full"
+                  animate={{ scaleY: [1, 1.2, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                />
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-primary" />
+                  <h2 className="text-3xl font-bold text-arc-gradient">Arc Analytics</h2>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="liquid-glass-premium border-0 shadow-xl">
+                  <CardContent className="pt-6">
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Total Transactions</p>
+                      <p className="text-3xl font-bold">{arcAnalytics.transactions.count}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Avg: ${arcAnalytics.transactions.average.toFixed(2)}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="liquid-glass-premium border-0 shadow-xl">
+                  <CardContent className="pt-6">
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Total Volume</p>
+                      <p className="text-3xl font-bold">${arcAnalytics.volume.total.toFixed(2)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        In: ${arcAnalytics.volume.incoming.toFixed(2)} | Out: ${arcAnalytics.volume.outgoing.toFixed(2)}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="liquid-glass-premium border-0 shadow-xl">
+                  <CardContent className="pt-6">
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Timeframe</p>
+                      <p className="text-3xl font-bold capitalize">{arcAnalytics.timeframe}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Last 30 days
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {arcAnalytics.insights && arcAnalytics.insights.length > 0 && (
+                <Card className="liquid-glass-premium border-0 shadow-xl">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      Insights & Recommendations
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {arcAnalytics.insights.map((insight, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.5 + index * 0.1 }}
+                          className="bg-primary/10 border border-primary/20 rounded-lg p-4"
+                        >
+                          <p className="text-sm font-semibold mb-1 capitalize">{insight.type}</p>
+                          <p className="text-sm text-muted-foreground">{insight.message}</p>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </motion.div>
+          )}
 
           {/* Financial Insights Section */}
           <motion.div
