@@ -9,8 +9,8 @@ const ActionButtons = () => {
   const buttonVariants = {
     hover: { 
       scale: 1.05,
-      y: -5,
-      transition: { type: "spring" as const, stiffness: 400 }
+      y: -8,
+      transition: { type: "spring" as const, stiffness: 400, damping: 10 }
     },
     tap: { scale: 0.95 }
   };
@@ -23,35 +23,63 @@ const ActionButtons = () => {
       className="grid grid-cols-2 gap-4"
     >
       <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
-        <Button 
-          onClick={() => navigate('/add-money')}
-          className="w-full h-auto py-8 flex flex-col gap-3 bg-gradient-to-br from-[#3CF276] to-[#2AB55E] hover:from-[#2AB55E] hover:to-[#3CF276] border-0 shadow-xl relative overflow-hidden group"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <motion.div
-            animate={{ rotate: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        <div className="liquid-glass-premium rounded-3xl p-[1px] shimmer liquid-wave">
+          <Button 
+            onClick={() => navigate('/add-money')}
+            className="w-full h-auto py-8 flex flex-col gap-3 bg-gradient-to-br from-[#3CF276] to-[#2AB55E] hover:from-[#2AB55E] hover:to-[#3CF276] border-0 shadow-xl relative overflow-hidden group rounded-3xl ripple-effect"
           >
-            <ArrowDownToLine className="h-7 w-7 relative z-10" />
-          </motion.div>
-          <span className="text-lg font-bold relative z-10">Add Money</span>
-        </Button>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            {/* Animated shimmer overlay */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              initial={{ x: "-100%" }}
+              animate={{ x: "200%" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 2 }}
+            />
+            
+            <motion.div
+              animate={{ 
+                rotate: [0, 10, -10, 0],
+                y: [0, -5, 0]
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <ArrowDownToLine className="h-7 w-7 relative z-10" />
+            </motion.div>
+            <span className="text-lg font-bold relative z-10">Add Money</span>
+          </Button>
+        </div>
       </motion.div>
       
       <motion.div variants={buttonVariants} whileHover="hover" whileTap="tap">
-        <Button 
-          onClick={() => navigate('/send-payment')}
-          className="w-full h-auto py-8 flex flex-col gap-3 bg-gradient-to-br from-[#4A44F2] to-[#31D2F7] hover:from-[#31D2F7] hover:to-[#4A44F2] border-0 shadow-xl relative overflow-hidden group"
-        >
-          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <motion.div
-            animate={{ x: [0, 5, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        <div className="liquid-glass-premium rounded-3xl p-[1px] shimmer liquid-wave">
+          <Button 
+            onClick={() => navigate('/send-payment')}
+            className="w-full h-auto py-8 flex flex-col gap-3 bg-gradient-to-br from-[#4A44F2] to-[#31D2F7] hover:from-[#31D2F7] hover:to-[#4A44F2] border-0 shadow-xl relative overflow-hidden group rounded-3xl ripple-effect"
           >
-            <Send className="h-7 w-7 relative z-10" />
-          </motion.div>
-          <span className="text-lg font-bold relative z-10">Send Payment</span>
-        </Button>
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            
+            {/* Animated shimmer overlay */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+              initial={{ x: "-100%" }}
+              animate={{ x: "200%" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear", repeatDelay: 2 }}
+            />
+            
+            <motion.div
+              animate={{ 
+                x: [0, 5, 0],
+                rotate: [0, 15, 0]
+              }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Send className="h-7 w-7 relative z-10" />
+            </motion.div>
+            <span className="text-lg font-bold relative z-10">Send Payment</span>
+          </Button>
+        </div>
       </motion.div>
     </motion.div>
   );

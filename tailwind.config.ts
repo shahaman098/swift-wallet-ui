@@ -91,17 +91,45 @@ export default {
           "0%": { transform: "translateY(100%)", opacity: "0" },
           "100%": { transform: "translateY(0)", opacity: "1" },
         },
+        "slide-in-right": {
+          "0%": { transform: "translateX(100%)", opacity: "0" },
+          "100%": { transform: "translateX(0)", opacity: "1" },
+        },
         "glow-pulse": {
           "0%, 100%": { boxShadow: "0 0 20px rgba(74, 68, 242, 0.3)" },
           "50%": { boxShadow: "0 0 40px rgba(74, 68, 242, 0.6)" },
+        },
+        "glow-arc": {
+          "0%, 100%": { 
+            boxShadow: "0 0 20px rgba(74, 68, 242, 0.4), 0 0 40px rgba(49, 210, 247, 0.2)" 
+          },
+          "50%": { 
+            boxShadow: "0 0 40px rgba(74, 68, 242, 0.6), 0 0 60px rgba(49, 210, 247, 0.3)" 
+          },
         },
         "float": {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "float-slow": {
+          "0%, 100%": { transform: "translateY(0px) translateX(0px)" },
+          "50%": { transform: "translateY(-20px) translateX(10px)" },
+        },
         shimmer: {
           "0%": { backgroundPosition: "-1000px 0" },
           "100%": { backgroundPosition: "1000px 0" },
+        },
+        "shimmer-slow": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
+        },
+        "draw-line": {
+          "0%": { strokeDashoffset: "1000" },
+          "100%": { strokeDashoffset: "0" },
+        },
+        "pulse-glow": {
+          "0%, 100%": { opacity: "0.5" },
+          "50%": { opacity: "1" },
         },
       },
       animation: {
@@ -111,9 +139,15 @@ export default {
         "fade-up": "fade-up 0.6s ease-out",
         "scale-in": "scale-in 0.3s ease-out",
         "slide-up": "slide-up 0.5s ease-out",
+        "slide-in-right": "slide-in-right 0.5s ease-out",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "glow-arc": "glow-arc 3s ease-in-out infinite",
         "float": "float 3s ease-in-out infinite",
+        "float-slow": "float-slow 6s ease-in-out infinite",
         "shimmer": "shimmer 2s infinite linear",
+        "shimmer-slow": "shimmer-slow 10s infinite linear",
+        "draw-line": "draw-line 2s ease-out forwards",
+        "pulse-glow": "pulse-glow 2s ease-in-out infinite",
       },
     },
   },
