@@ -6,7 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import Navbar from "@/components/Navbar";
-import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
+import ArcFinalityAnimation from "@/components/ArcFinalityAnimation";
+import { ArrowLeft, CheckCircle2, Sparkles, Network } from "lucide-react";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/use-window-size";
@@ -61,23 +62,17 @@ const AddMoney = () => {
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
           >
-            <Card className="backdrop-blur-sm bg-card/80 border-0 shadow-2xl text-center overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#3CF276]/10 via-transparent to-[#31D2F7]/10" />
-              <CardContent className="pt-16 pb-12 relative">
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1, rotate: 360 }}
-                  transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                  className="mx-auto w-24 h-24 bg-gradient-to-br from-[#3CF276] to-[#2AB55E] rounded-full flex items-center justify-center mb-6 shadow-xl"
-                >
-                  <CheckCircle2 className="h-12 w-12 text-white" />
-                </motion.div>
+            <Card className="liquid-glass-premium border-0 shadow-2xl text-center overflow-hidden">
+              <CardContent className="pt-8 pb-12 relative">
+                <ArcFinalityAnimation />
+                
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
+                  transition={{ delay: 0.6 }}
+                  className="mt-8"
                 >
-                  <h2 className="text-3xl font-bold mb-3 bg-gradient-to-r from-[#3CF276] to-[#2AB55E] bg-clip-text text-transparent">
+                  <h2 className="text-3xl font-bold mb-3 text-arc-gradient">
                     Money Added!
                   </h2>
                   <div className="space-y-2 mb-6">
@@ -86,14 +81,13 @@ const AddMoney = () => {
                     </p>
                     <p className="text-muted-foreground">has been added to your account</p>
                   </div>
-                  <motion.div
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
+                  <Button
+                    onClick={() => navigate("/dashboard")}
+                    className="mt-4 px-8"
+                    size="lg"
                   >
-                    <Sparkles className="h-4 w-4" />
-                    <span>Redirecting to dashboard...</span>
-                  </motion.div>
+                    Back to Dashboard
+                  </Button>
                 </motion.div>
               </CardContent>
             </Card>
@@ -127,13 +121,13 @@ const AddMoney = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="backdrop-blur-sm bg-card/80 border-0 shadow-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#3CF276]/5 via-transparent to-[#31D2F7]/5" />
-            <CardHeader className="relative">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-[#3CF276] to-[#31D2F7] bg-clip-text text-transparent">
+          <Card className="liquid-glass-premium border-0 shadow-2xl overflow-hidden hover-lift shimmer">
+            <CardHeader className="relative border-b border-white/10 bg-gradient-to-br from-success/5 to-transparent">
+              <CardTitle className="text-3xl font-bold text-arc-gradient flex items-center gap-2">
+                <Network className="h-8 w-8" />
                 Add Money
               </CardTitle>
-              <CardDescription className="text-base">Deposit funds to your account instantly</CardDescription>
+              <CardDescription className="text-base">Deposit funds via CCTP instantly</CardDescription>
             </CardHeader>
             <CardContent className="relative">
               <form onSubmit={handleSubmit} className="space-y-6">

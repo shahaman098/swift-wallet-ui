@@ -8,6 +8,9 @@ import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import AddMoney from "./pages/AddMoney";
 import SendPayment from "./pages/SendPayment";
+import SplitPayment from "./pages/SplitPayment";
+import RequestPayment from "./pages/RequestPayment";
+import PaymentRequestView from "./pages/PaymentRequestView";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +28,9 @@ const App = () => (
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/add-money" element={<AddMoney />} />
           <Route path="/send-payment" element={<SendPayment />} />
+          <Route path="/split-payment" element={<SplitPayment />} />
+          <Route path="/request-payment" element={<RequestPayment />} />
+          <Route path="/pay/:requestId" element={<PaymentRequestView />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
