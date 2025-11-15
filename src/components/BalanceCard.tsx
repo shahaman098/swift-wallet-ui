@@ -28,13 +28,13 @@ const BalanceCard = ({ balance, loading = false }: BalanceCardProps) => {
     >
       <Card className="relative overflow-hidden border-0 shadow-2xl liquid-glass-premium shimmer liquid-wave rounded-3xl">
         {/* Premium gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A0F2D] via-[#4A44F2] to-[#31D2F7] opacity-90" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#E0E7FF] via-[#C7D2FE] to-[#DBEAFE] dark:from-[#0A0F2D] dark:via-[#4A44F2] dark:to-[#31D2F7] opacity-90 transition-colors duration-300" />
         
         {/* Animated mesh gradient overlay */}
         <motion.div
-          className="absolute inset-0 opacity-30"
+          className="absolute inset-0 opacity-20 dark:opacity-30"
           style={{
-            background: 'radial-gradient(circle at 20% 50%, rgba(74, 68, 242, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(49, 210, 247, 0.3) 0%, transparent 50%)',
+            background: 'radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
           }}
           animate={{
             scale: [1, 1.1, 1],
@@ -49,13 +49,13 @@ const BalanceCard = ({ balance, loading = false }: BalanceCardProps) => {
         
         {/* Animated glow effect */}
         <motion.div
-          className="absolute -inset-1 rounded-3xl opacity-40 blur-2xl"
+          className="absolute -inset-1 rounded-3xl opacity-30 dark:opacity-40 blur-2xl"
           style={{
-            background: 'linear-gradient(135deg, #4A44F2, #31D2F7, #9D4EDD)',
+            background: 'linear-gradient(135deg, #6366F1, #3B82F6, #8B5CF6)',
           }}
           animate={{
             scale: [1, 1.05, 1],
-            opacity: [0.3, 0.6, 0.3],
+            opacity: [0.2, 0.4, 0.2],
           }}
           transition={{
             duration: 4,
@@ -68,7 +68,7 @@ const BalanceCard = ({ balance, loading = false }: BalanceCardProps) => {
         {[...Array(3)].map((_, i) => (
           <motion.div
             key={i}
-            className="absolute w-2 h-2 bg-white/20 rounded-full blur-sm"
+            className="absolute w-2 h-2 bg-white/20 dark:bg-white/30 rounded-full blur-sm"
             style={{
               left: `${20 + i * 30}%`,
               top: `${30 + i * 20}%`,
@@ -99,23 +99,23 @@ const BalanceCard = ({ balance, loading = false }: BalanceCardProps) => {
                 animate={{ rotate: [0, 10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
               >
-                <DollarSign className="h-5 w-5 text-white/90" />
+                <DollarSign className="h-5 w-5 text-foreground/90" />
               </motion.div>
-              <p className="text-sm font-semibold text-white/90 tracking-wide uppercase">Available Balance</p>
+              <p className="text-sm font-semibold text-foreground/90 tracking-wide uppercase">Available Balance</p>
             </div>
             <motion.div
-              className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20"
+              className="px-3 py-1 rounded-full bg-white/10 dark:bg-white/20 backdrop-blur-sm border border-white/20"
               animate={{ scale: [1, 1.05, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <span className="text-xs text-white/80 font-medium">Live</span>
+              <span className="text-xs text-foreground/80 font-medium">Live</span>
             </motion.div>
           </motion.div>
           
           {loading ? (
             <div className="space-y-3">
               <motion.div 
-                className="h-14 w-48 bg-white/20 rounded-xl"
+                className="h-14 w-48 bg-white/20 dark:bg-white/30 rounded-xl"
                 animate={{
                   backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
                 }}
@@ -137,14 +137,14 @@ const BalanceCard = ({ balance, loading = false }: BalanceCardProps) => {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
               >
-                <p className="text-6xl font-bold text-white tracking-tight mb-2">
+                <p className="text-6xl font-bold text-foreground tracking-tight mb-2">
                   ${balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <motion.div 
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="flex items-center gap-1 text-[#3CF276]"
+                  className="flex items-center gap-1 text-green-600 dark:text-[#3CF276]"
                 >
                   <TrendingUp className="h-4 w-4" />
                   <span className="text-sm font-semibold">+2.5% this month</span>
@@ -163,7 +163,7 @@ const BalanceCard = ({ balance, loading = false }: BalanceCardProps) => {
                     <Line 
                       type="monotone" 
                       dataKey="value" 
-                      stroke="#3CF276" 
+                      stroke="#10B981" 
                       strokeWidth={2}
                       dot={false}
                       animationDuration={1500}

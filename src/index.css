@@ -8,108 +8,116 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 220 20% 97%;
-    --foreground: 232 60% 12%;
+    --background: 245 248 250;
+    --foreground: 15 23 42;
 
-    --card: 0 0% 100%;
-    --card-foreground: 232 60% 12%;
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 232 60% 12%;
+    --popover: 255 255 255;
+    --popover-foreground: 15 23 42;
 
-    --primary: 243 75% 59%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 243 75 59;
+    --primary-foreground: 255 255 255;
 
-    --secondary: 220 20% 96%;
-    --secondary-foreground: 232 60% 12%;
+    --secondary: 241 245 249;
+    --secondary-foreground: 15 23 42;
 
-    --muted: 220 18% 94%;
-    --muted-foreground: 232 20% 45%;
+    --muted: 241 245 249;
+    --muted-foreground: 100 116 139;
 
-    --accent: 145 70% 55%;
-    --accent-foreground: 232 60% 12%;
+    --accent: 145 70 55;
+    --accent-foreground: 15 23 42;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 72 51;
+    --destructive-foreground: 255 255 255;
 
-    --border: 220 15% 90%;
-    --input: 220 15% 92%;
-    --ring: 243 75% 59%;
+    --border: 226 232 240;
+    --input: 226 232 240;
+    --ring: 243 75 59;
 
     --radius: 1rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 255 255 255;
+    --sidebar-foreground: 51 65 85;
+    --sidebar-primary: 15 23 42;
+    --sidebar-primary-foreground: 248 250 252;
+    --sidebar-accent: 241 245 249;
+    --sidebar-accent-foreground: 15 23 42;
+    --sidebar-border: 226 232 240;
+    --sidebar-ring: 243 75 59;
 
-    /* Premium Fintech Design Tokens */
-    --midnight: 232 60% 12%;
-    --electric-purple: 243 75% 59%;
-    --neon-blue: 193 88% 59%;
-    --neon-green: 145 70% 55%;
+    /* Premium Fintech Design Tokens - Light Mode */
+    --midnight: 15 23 42;
+    --electric-purple: 243 75 59;
+    --neon-blue: 193 88 59;
+    --neon-green: 145 70 55;
     
-    --gradient-premium: linear-gradient(135deg, #0A0F2D 0%, #4A44F2 50%, #31D2F7 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    --gradient-success: linear-gradient(135deg, #3CF276 0%, #2AB55E 100%);
-    --gradient-card: linear-gradient(135deg, rgba(74,68,242,0.05) 0%, rgba(49,210,247,0.05) 100%);
+    --gradient-premium: linear-gradient(135deg, #F8FAFC 0%, #E0E7FF 50%, #DBEAFE 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.3) 100%);
+    --gradient-success: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    --gradient-card: linear-gradient(135deg, rgba(99,102,241,0.03) 0%, rgba(59,130,246,0.03) 100%);
     
-    --shadow-premium: 0 8px 32px rgba(74, 68, 242, 0.15);
-    --shadow-glass: 0 8px 32px rgba(31, 38, 135, 0.15);
-    --shadow-glow: 0 0 40px rgba(74, 68, 242, 0.3);
-    --shadow-elevated: 0 20px 60px rgba(10, 15, 45, 0.12);
+    --shadow-premium: 0 8px 32px rgba(0, 0, 0, 0.08);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.06);
+    --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
+    --shadow-elevated: 0 20px 60px rgba(0, 0, 0, 0.1);
     
-    --blur-glass: blur(10px);
+    --blur-glass: blur(20px);
     --transition-smooth: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-spring: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
   .dark {
-    --background: 232 60% 8%;
-    --foreground: 220 20% 95%;
+    --background: 10 15 45;
+    --foreground: 241 245 249;
 
-    --card: 232 50% 12%;
-    --card-foreground: 220 20% 95%;
+    --card: 15 23 55;
+    --card-foreground: 241 245 249;
 
-    --popover: 232 50% 12%;
-    --popover-foreground: 220 20% 95%;
+    --popover: 15 23 55;
+    --popover-foreground: 241 245 249;
 
-    --primary: 243 75% 65%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 243 75 65;
+    --primary-foreground: 255 255 255;
 
-    --secondary: 232 40% 16%;
-    --secondary-foreground: 220 20% 95%;
+    --secondary: 20 28 60;
+    --secondary-foreground: 241 245 249;
 
-    --muted: 232 40% 18%;
-    --muted-foreground: 220 15% 60%;
+    --muted: 20 28 60;
+    --muted-foreground: 148 163 184;
 
-    --accent: 145 70% 55%;
-    --accent-foreground: 232 60% 12%;
+    --accent: 145 70 55;
+    --accent-foreground: 15 23 42;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 72 51;
+    --destructive-foreground: 255 255 255;
 
-    --border: 232 30% 22%;
-    --input: 232 30% 20%;
-    --ring: 243 75% 65%;
+    --border: 30 40 70;
+    --input: 30 40 70;
+    --ring: 243 75 65;
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 15 20 50;
+    --sidebar-foreground: 226 232 240;
+    --sidebar-primary: 99 102 241;
+    --sidebar-primary-foreground: 255 255 255;
+    --sidebar-accent: 30 40 70;
+    --sidebar-accent-foreground: 241 245 249;
+    --sidebar-border: 30 40 70;
+    --sidebar-ring: 243 75 65;
+
+    /* Premium Fintech Design Tokens - Dark Mode */
+    --gradient-premium: linear-gradient(135deg, #0A0F2D 0%, #4A44F2 50%, #31D2F7 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+    --gradient-success: linear-gradient(135deg, #3CF276 0%, #2AB55E 100%);
+    --gradient-card: linear-gradient(135deg, rgba(74,68,242,0.05) 0%, rgba(49,210,247,0.05) 100%);
 
     --shadow-premium: 0 8px 32px rgba(74, 68, 242, 0.25);
     --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
     --shadow-glow: 0 0 60px rgba(74, 68, 242, 0.5);
     --shadow-elevated: 0 20px 60px rgba(0, 0, 0, 0.3);
+    
+    --blur-glass: blur(30px);
   }
 }
 
@@ -124,33 +132,48 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
-  /* Liquid Glass Effect - VisionOS Style */
+  /* Professional Liquid Glass Effect */
   .liquid-glass {
     background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 
-      0 8px 32px rgba(31, 38, 135, 0.15),
-      inset 0 1px 1px rgba(255, 255, 255, 0.1),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+    backdrop-filter: var(--blur-glass) saturate(180%);
+    -webkit-backdrop-filter: var(--blur-glass) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: var(--shadow-glass);
+    transition: var(--transition-smooth);
+  }
+  
+  .dark .liquid-glass {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
   
   .liquid-glass-premium {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(24px) saturate(200%);
+    -webkit-backdrop-filter: blur(24px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 1px 2px rgba(255, 255, 255, 0.2),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.05);
+    transition: var(--transition-smooth);
+  }
+  
+  .dark .liquid-glass-premium {
     background: linear-gradient(
       135deg,
-      rgba(74, 68, 242, 0.1) 0%,
-      rgba(49, 210, 247, 0.08) 50%,
-      rgba(60, 242, 118, 0.06) 100%
+      rgba(74, 68, 242, 0.08) 0%,
+      rgba(49, 210, 247, 0.06) 50%,
+      rgba(60, 242, 118, 0.04) 100%
     );
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(30px) saturate(200%);
+    -webkit-backdrop-filter: blur(30px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 
       0 8px 32px rgba(74, 68, 242, 0.2),
       0 0 80px rgba(49, 210, 247, 0.1),
-      inset 0 1px 2px rgba(255, 255, 255, 0.15),
-      inset 0 -2px 4px rgba(74, 68, 242, 0.1);
+      inset 0 1px 2px rgba(255, 255, 255, 0.1),
+      inset 0 -2px 4px rgba(74, 68, 242, 0.08);
   }
   
   /* Shimmer Animation */
@@ -169,10 +192,19 @@ All colors MUST be HSL.
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0.08) 50%,
       transparent 100%
     );
-    animation: shimmer-slide 8s ease-in-out infinite;
+    animation: shimmer-slide 10s ease-in-out infinite;
+  }
+  
+  .dark .shimmer::before {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.12) 50%,
+      transparent 100%
+    );
   }
   
   @keyframes shimmer-slide {
@@ -183,7 +215,7 @@ All colors MUST be HSL.
   
   /* Liquid Wave Effect */
   .liquid-wave {
-    animation: liquid-wave 8s ease-in-out infinite;
+    animation: liquid-wave 12s ease-in-out infinite;
   }
   
   @keyframes liquid-wave {
@@ -192,43 +224,67 @@ All colors MUST be HSL.
       transform: scale(1) rotate(0deg);
     }
     25% { 
-      border-radius: 28px 20px 26px 22px;
-      transform: scale(1.01) rotate(0.5deg);
+      border-radius: 26px 22px 25px 23px;
+      transform: scale(1.005) rotate(0.3deg);
     }
     50% { 
-      border-radius: 22px 26px 24px 28px;
-      transform: scale(1.02) rotate(-0.5deg);
+      border-radius: 23px 25px 24px 26px;
+      transform: scale(1.008) rotate(-0.3deg);
     }
     75% { 
-      border-radius: 26px 24px 22px 26px;
-      transform: scale(1.01) rotate(0.3deg);
+      border-radius: 25px 24px 23px 25px;
+      transform: scale(1.005) rotate(0.2deg);
     }
   }
   
-  /* Premium Gradient */
+  /* Premium Gradients */
   .premium-gradient {
+    background: linear-gradient(135deg, #F8FAFC 0%, #E0E7FF 50%, #DBEAFE 100%);
+  }
+  
+  .dark .premium-gradient {
     background: linear-gradient(135deg, #0A0F2D 0%, #4A44F2 50%, #31D2F7 100%);
   }
   
-  /* Arc Gradient */
   .arc-gradient {
+    background: linear-gradient(135deg, #6366F1 0%, #3B82F6 50%, #8B5CF6 100%);
+  }
+  
+  .dark .arc-gradient {
     background: linear-gradient(135deg, #4A44F2 0%, #31D2F7 50%, #9D4EDD 100%);
   }
   
   /* Glow Effects */
   .glow-effect {
-    box-shadow: 0 0 40px rgba(74, 68, 242, 0.3);
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.2);
+  }
+  
+  .dark .glow-effect {
+    box-shadow: 0 0 40px rgba(74, 68, 242, 0.4);
   }
   
   .glow-arc {
     box-shadow: 
-      0 0 20px rgba(74, 68, 242, 0.4),
-      0 0 40px rgba(49, 210, 247, 0.2),
-      0 0 60px rgba(157, 78, 221, 0.1);
+      0 0 20px rgba(99, 102, 241, 0.3),
+      0 0 40px rgba(59, 130, 246, 0.15);
+  }
+  
+  .dark .glow-arc {
+    box-shadow: 
+      0 0 20px rgba(74, 68, 242, 0.5),
+      0 0 40px rgba(49, 210, 247, 0.25),
+      0 0 60px rgba(157, 78, 221, 0.15);
   }
   
   /* Text Gradients */
   .text-gradient {
+    background: linear-gradient(135deg, #6366F1 0%, #3B82F6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .dark .text-gradient {
     background: linear-gradient(135deg, #4A44F2 0%, #31D2F7 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -236,6 +292,13 @@ All colors MUST be HSL.
   }
   
   .text-arc-gradient {
+    background: linear-gradient(135deg, #6366F1 0%, #3B82F6 50%, #8B5CF6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .dark .text-arc-gradient {
     background: linear-gradient(135deg, #4A44F2 0%, #31D2F7 50%, #9D4EDD 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -248,10 +311,19 @@ All colors MUST be HSL.
   }
   
   .hover-lift:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-6px) scale(1.01);
+  }
+  
+  .hover-lift:hover {
     box-shadow: 
-      0 20px 60px rgba(74, 68, 242, 0.25),
-      0 0 80px rgba(49, 210, 247, 0.15);
+      0 20px 60px rgba(0, 0, 0, 0.12),
+      0 0 40px rgba(99, 102, 241, 0.1);
+  }
+  
+  .dark .hover-lift:hover {
+    box-shadow: 
+      0 20px 60px rgba(74, 68, 242, 0.3),
+      0 0 80px rgba(49, 210, 247, 0.2);
   }
   
   /* Ripple Effect */
@@ -278,7 +350,7 @@ All colors MUST be HSL.
     left: 50%;
     width: 20px;
     height: 20px;
-    background: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.4);
     border-radius: 50%;
     transform: translate(-50%, -50%) scale(0);
     pointer-events: none;
@@ -286,5 +358,10 @@ All colors MUST be HSL.
   
   .ripple-effect:active::after {
     animation: ripple 0.6s ease-out;
+  }
+  
+  /* Theme transition */
+  * {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
   }
 }
