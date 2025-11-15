@@ -6,9 +6,11 @@ import ActionButtons from "@/components/ActionButtons";
 import TransactionItem from "@/components/TransactionItem";
 import Loading from "@/components/Loading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useTreasuryBrain } from "@/hooks/useTreasuryBrain";
 import { motion } from "framer-motion";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
-import { TrendingUp, Activity, PieChartIcon } from "lucide-react";
+import { TrendingUp, Activity, PieChartIcon, Bot, Sparkles } from "lucide-react";
 
 interface Transaction {
   id: string;
@@ -47,6 +49,10 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const treasury = useTreasuryBrain();
+  const treasuryOrg = treasury.selectedOrg;
+  const runway = treasury.mlInsightForSelectedOrg?.runwayMonths ?? null;
+  const dueSchedules = treasury.automationDueSchedules.length;
 
   useEffect(() => {
     const token = localStorage.getItem('authToken');
@@ -327,6 +333,56 @@ const Dashboard = () => {
                 </Card>
               </motion.div>
             </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="hover-lift"
+            >
+              <Card className="liquid-glass-premium border-0 shadow-xl rounded-3xl overflow-hidden shimmer">
+                <CardHeader className="border-b border-white/10 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                    Arc Treasury Brain Snapshot
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="grid gap-3 text-sm">
+                    <p className="text-muted-foreground">
+                      {treasuryOrg ? (
+                        <>
+                          Active org <span className="font-semibold text-foreground">{treasuryOrg.name}</span> operating on
+                          chain {treasuryOrg.homeChainId}.
+                        </>
+                      ) : (
+                        "Select an organisation in Treasury Brain to view detailed telemetry."
+                      )}
+                    </p>
+                    <p className="flex items-center gap-2 text-muted-foreground">
+                      <Bot className="h-4 w-4 text-primary" />
+                      {dueSchedules > 0
+                        ? `${dueSchedules} automation schedule${dueSchedules > 1 ? "s" : ""} ready for execution.`
+                        : "All automation schedules are on cadence."}
+                    </p>
+                    {runway !== null && (
+                      <p className="text-muted-foreground">
+                        ML runway estimate: <span className="font-semibold text-foreground">{runway} months</span> remaining.
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex justify-end mt-6">
+                    <Button
+                      variant="outline"
+                      className="border-primary/40 text-primary"
+                      onClick={() => navigate("/treasury")}
+                    >
+                      Open Treasury Brain
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </motion.div>
 
           {/* Recent Activity */}
