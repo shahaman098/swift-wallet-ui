@@ -87,9 +87,9 @@ const Dashboard = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 relative overflow-hidden">
-      {/* Arc Network Background */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 relative overflow-hidden transition-colors duration-300">
+      {/* Arc Network Background - Dark Mode Only */}
+      <div className="dark:opacity-5 opacity-0 absolute inset-0 pointer-events-none transition-opacity duration-300">
         <svg className="w-full h-full" viewBox="0 0 1000 1000">
           {[...Array(20)].map((_, i) => (
             <motion.circle
@@ -178,7 +178,7 @@ const Dashboard = () => {
                 className="hover-lift"
               >
                 <Card className="liquid-glass-premium border-0 shadow-xl rounded-3xl overflow-hidden shimmer h-full">
-                  <CardHeader className="border-b border-white/10 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardHeader className="border-b border-border/30 bg-gradient-to-br from-primary/5 to-transparent">
                     <CardTitle className="flex items-center gap-2 text-xl">
                       <TrendingUp className="h-5 w-5 text-primary" />
                       Weekly Trend
@@ -189,24 +189,25 @@ const Dashboard = () => {
                       <AreaChart data={weeklyData}>
                         <defs>
                           <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#4A44F2" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#31D2F7" stopOpacity={0.1}/>
+                            <stop offset="5%" stopColor="#6366F1" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1}/>
                           </linearGradient>
                         </defs>
-                        <XAxis dataKey="day" stroke="#888" fontSize={12} />
-                        <YAxis stroke="#888" fontSize={12} />
+                        <XAxis dataKey="day" stroke="currentColor" className="text-muted-foreground" fontSize={12} />
+                        <YAxis stroke="currentColor" className="text-muted-foreground" fontSize={12} />
                         <Tooltip 
                           contentStyle={{ 
-                            background: 'rgba(10, 15, 45, 0.9)', 
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            background: 'rgba(var(--card), 0.95)', 
+                            border: '1px solid rgba(var(--border), 0.5)',
                             borderRadius: '12px',
-                            backdropFilter: 'blur(10px)'
+                            backdropFilter: 'blur(10px)',
+                            color: 'hsl(var(--foreground))'
                           }}
                         />
                         <Area 
                           type="monotone" 
                           dataKey="amount" 
-                          stroke="#4A44F2" 
+                          stroke="#6366F1" 
                           strokeWidth={3}
                           fillOpacity={1} 
                           fill="url(#colorAmount)"
@@ -226,7 +227,7 @@ const Dashboard = () => {
                 className="hover-lift"
               >
                 <Card className="liquid-glass-premium border-0 shadow-xl rounded-3xl overflow-hidden shimmer h-full">
-                  <CardHeader className="border-b border-white/10 bg-gradient-to-br from-accent/5 to-transparent">
+                  <CardHeader className="border-b border-border/30 bg-gradient-to-br from-accent/5 to-transparent">
                     <CardTitle className="flex items-center gap-2 text-xl">
                       <PieChartIcon className="h-5 w-5 text-accent" />
                       Distribution
@@ -251,10 +252,11 @@ const Dashboard = () => {
                         </Pie>
                         <Tooltip 
                           contentStyle={{ 
-                            background: 'rgba(10, 15, 45, 0.9)', 
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            background: 'rgba(var(--card), 0.95)', 
+                            border: '1px solid rgba(var(--border), 0.5)',
                             borderRadius: '12px',
-                            backdropFilter: 'blur(10px)'
+                            backdropFilter: 'blur(10px)',
+                            color: 'hsl(var(--foreground))'
                           }}
                         />
                       </PieChart>
@@ -279,7 +281,7 @@ const Dashboard = () => {
                 className="lg:col-span-2 hover-lift"
               >
                 <Card className="liquid-glass-premium border-0 shadow-xl rounded-3xl overflow-hidden shimmer">
-                  <CardHeader className="border-b border-white/10 bg-gradient-to-br from-primary/5 to-transparent">
+                  <CardHeader className="border-b border-border/30 bg-gradient-to-br from-primary/5 to-transparent">
                     <CardTitle className="flex items-center gap-2 text-xl">
                       <Activity className="h-5 w-5 text-primary" />
                       Monthly Comparison
@@ -288,18 +290,19 @@ const Dashboard = () => {
                   <CardContent className="pt-6">
                     <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={monthlyData}>
-                        <XAxis dataKey="month" stroke="#888" fontSize={12} />
-                        <YAxis stroke="#888" fontSize={12} />
+                        <XAxis dataKey="month" stroke="currentColor" className="text-muted-foreground" fontSize={12} />
+                        <YAxis stroke="currentColor" className="text-muted-foreground" fontSize={12} />
                         <Tooltip 
                           contentStyle={{ 
-                            background: 'rgba(10, 15, 45, 0.9)', 
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            background: 'rgba(var(--card), 0.95)', 
+                            border: '1px solid rgba(var(--border), 0.5)',
                             borderRadius: '12px',
-                            backdropFilter: 'blur(10px)'
+                            backdropFilter: 'blur(10px)',
+                            color: 'hsl(var(--foreground))'
                           }}
                         />
-                        <Bar dataKey="income" fill="#3CF276" radius={[8, 8, 0, 0]} animationDuration={1500} />
-                        <Bar dataKey="expenses" fill="#4A44F2" radius={[8, 8, 0, 0]} animationDuration={1500} />
+                        <Bar dataKey="income" fill="#10B981" radius={[8, 8, 0, 0]} animationDuration={1500} />
+                        <Bar dataKey="expenses" fill="#6366F1" radius={[8, 8, 0, 0]} animationDuration={1500} />
                       </BarChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -316,7 +319,7 @@ const Dashboard = () => {
             className="hover-lift"
           >
             <Card className="liquid-glass-premium border-0 shadow-xl rounded-3xl overflow-hidden shimmer">
-              <CardHeader className="border-b border-white/10 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardHeader className="border-b border-border/30 bg-gradient-to-br from-primary/5 to-transparent">
                 <CardTitle className="text-2xl font-bold flex items-center gap-2">
                   <motion.div
                     className="w-1 h-8 bg-gradient-to-b from-primary to-accent rounded-full"
