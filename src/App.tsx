@@ -12,30 +12,35 @@ import SplitPayment from "./pages/SplitPayment";
 import RequestPayment from "./pages/RequestPayment";
 import PaymentRequestView from "./pages/PaymentRequestView";
 import NotFound from "./pages/NotFound";
+import TreasuryBrain from "./pages/TreasuryBrain";
+import { TreasuryProvider } from "./context/TreasuryProvider";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/add-money" element={<AddMoney />} />
-          <Route path="/send-payment" element={<SendPayment />} />
-          <Route path="/split-payment" element={<SplitPayment />} />
-          <Route path="/request-payment" element={<RequestPayment />} />
-          <Route path="/pay/:requestId" element={<PaymentRequestView />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <TreasuryProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/treasury" element={<TreasuryBrain />} />
+            <Route path="/add-money" element={<AddMoney />} />
+            <Route path="/send-payment" element={<SendPayment />} />
+            <Route path="/split-payment" element={<SplitPayment />} />
+            <Route path="/request-payment" element={<RequestPayment />} />
+            <Route path="/pay/:requestId" element={<PaymentRequestView />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </TreasuryProvider>
   </QueryClientProvider>
 );
 
