@@ -5,6 +5,12 @@ import { User } from '../models/User';
 
 const router = Router();
 
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('Missing JWT_SECRET environment variable');
+}
+
 // Middleware to extract user from token
 const getUser = async (req: any): Promise<string | null> => {
   try {
@@ -12,7 +18,7 @@ const getUser = async (req: any): Promise<string | null> => {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
     return decoded.userId;
   } catch (error) {
     return null;

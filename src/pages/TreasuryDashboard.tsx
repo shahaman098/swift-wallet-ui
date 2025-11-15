@@ -52,54 +52,35 @@ const TreasuryDashboard = () => {
 
   const loadData = async () => {
     try {
-      // First, fetch all existing orgs
-      try {
-        const orgsResponse = await treasuryAPI.getOrgs();
-        const fetchedOrgs = orgsResponse.data || [];
-        
-        if (fetchedOrgs.length > 0) {
-          setOrgs(fetchedOrgs);
-          const currentOrgId = selectedOrg || localStorage.getItem('selectedOrgId') || fetchedOrgs[0].id;
-          setSelectedOrg(currentOrgId);
-          localStorage.setItem('selectedOrgId', currentOrgId);
-        } else {
-          // Create a default org if none exists
-          try {
-            const orgResponse = await treasuryAPI.createOrg({
-              name: "My Organization",
-              smartAccount: "0x0000000000000000000000000000000000000000"
-            });
-            setOrgs([orgResponse.data]);
-            setSelectedOrg(orgResponse.data.id);
-            localStorage.setItem('selectedOrgId', orgResponse.data.id);
-          } catch (error) {
-            console.error('Failed to create default org:', error);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch orgs:', error);
+      const orgsResponse = await treasuryAPI.getOrgs();
+      const fetchedOrgs: Org[] = Array.isArray(orgsResponse.data) ? orgsResponse.data : [];
+      setOrgs(fetchedOrgs);
+
+      if (fetchedOrgs.length === 0) {
+        setDepartments([]);
+        setRecommendations(null);
+        setSelectedOrg(null);
+        localStorage.removeItem('selectedOrgId');
+        return;
       }
 
-      const currentOrgId = selectedOrg || localStorage.getItem('selectedOrgId');
-      if (currentOrgId) {
-        setSelectedOrg(currentOrgId);
-        try {
-          const deptsResponse = await treasuryAPI.getDepartments(currentOrgId);
-          setDepartments(deptsResponse.data || []);
-        } catch (error) {
-          console.log('No departments yet');
-          setDepartments([]);
-        }
-        
-        try {
-          const recResponse = await mlAPI.getRecommendations(currentOrgId);
-          setRecommendations(recResponse.data);
-        } catch (error) {
-          console.log('Recommendations not available');
-        }
-      }
+      const storedOrgId = localStorage.getItem('selectedOrgId');
+      const validOrgId = storedOrgId && fetchedOrgs.some((org) => org.id === storedOrgId)
+        ? storedOrgId
+        : fetchedOrgs[0].id;
+
+      setSelectedOrg(validOrgId);
+      localStorage.setItem('selectedOrgId', validOrgId);
+
+      const deptsResponse = await treasuryAPI.getDepartments(validOrgId);
+      setDepartments(Array.isArray(deptsResponse.data) ? deptsResponse.data : []);
+
+      const recResponse = await mlAPI.getRecommendations(validOrgId);
+      setRecommendations(recResponse.data);
     } catch (error) {
       console.error('Failed to load treasury data:', error);
+      setDepartments([]);
+      setRecommendations(null);
     } finally {
       setLoading(false);
     }
@@ -143,6 +124,11 @@ const TreasuryDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
+              {orgs.length === 0 && (
+                <p className="text-muted-foreground text-center py-4">
+                  No organizations available. Create one to get started.
+                </p>
+              )}
               {orgs.map((org) => (
                 <div
                   key={org.id}
@@ -192,7 +178,7 @@ const TreasuryDashboard = () => {
                 ))
               ) : (
                 <p className="text-muted-foreground text-center py-4">
-                  No departments yet
+                  No departments found for the selected organization.
                 </p>
               )}
               <Button
@@ -245,7 +231,7 @@ const TreasuryDashboard = () => {
                 </div>
               ) : (
                 <p className="text-muted-foreground text-center py-4">
-                  No recommendations available
+                  Treasury intelligence is unavailable. Ensure analytics services are configured.
                 </p>
               )}
             </CardContent>

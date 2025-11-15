@@ -23,16 +23,20 @@ const ORG_REGISTRY_ABI = [
 
 export class SmartContractService {
   private provider: ethers.JsonRpcProvider;
-  private signer: ethers.Wallet;
+  private signer: ethers.Wallet | null = null;
   private vaultContract: ethers.Contract | null = null;
   private ruleEngineContract: ethers.Contract | null = null;
   private orgRegistryContract: ethers.Contract | null = null;
 
   constructor() {
-    const rpcUrl = process.env.RPC_URL || 'https://eth-sepolia.g.alchemy.com/v2/YOUR_KEY';
-    const privateKey = process.env.PRIVATE_KEY || '';
-    
+    const rpcUrl = process.env.RPC_URL;
+    if (!rpcUrl) {
+      throw new Error('Missing RPC_URL environment variable');
+    }
+
     this.provider = new ethers.JsonRpcProvider(rpcUrl);
+
+    const privateKey = process.env.PRIVATE_KEY;
     if (privateKey) {
       this.signer = new ethers.Wallet(privateKey, this.provider);
     }
@@ -43,20 +47,23 @@ export class SmartContractService {
     const ruleEngineAddress = process.env.RULE_ENGINE_CONTRACT_ADDRESS;
     const orgRegistryAddress = process.env.ORG_REGISTRY_CONTRACT_ADDRESS;
 
-    if (vaultAddress) {
-      this.vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, this.signer);
+    if (!vaultAddress || !ruleEngineAddress || !orgRegistryAddress) {
+      throw new Error('Missing contract address configuration. Set VAULT_CONTRACT_ADDRESS, RULE_ENGINE_CONTRACT_ADDRESS, and ORG_REGISTRY_CONTRACT_ADDRESS.');
     }
-    if (ruleEngineAddress) {
-      this.ruleEngineContract = new ethers.Contract(ruleEngineAddress, RULE_ENGINE_ABI, this.signer);
-    }
-    if (orgRegistryAddress) {
-      this.orgRegistryContract = new ethers.Contract(orgRegistryAddress, ORG_REGISTRY_ABI, this.signer);
-    }
+
+    const runner = this.signer ?? this.provider;
+
+    this.vaultContract = new ethers.Contract(vaultAddress, VAULT_ABI, runner);
+    this.ruleEngineContract = new ethers.Contract(ruleEngineAddress, RULE_ENGINE_ABI, runner);
+    this.orgRegistryContract = new ethers.Contract(orgRegistryAddress, ORG_REGISTRY_ABI, runner);
   }
 
   async depositToVault(orgId: number, amount: string): Promise<string> {
     if (!this.vaultContract) {
       throw new Error('Vault contract not initialized');
+    }
+    if (!this.signer) {
+      throw new Error('Missing PRIVATE_KEY environment variable for contract interactions');
     }
 
     const amountWei = ethers.parseUnits(amount, 6); // USDC has 6 decimals
@@ -74,9 +81,21 @@ export class SmartContractService {
     return ethers.formatUnits(balance, 6); // USDC has 6 decimals
   }
 
+  async getDeptBalance(orgId: number, deptId: number): Promise<string> {
+    if (!this.vaultContract) {
+      throw new Error('Vault contract not initialized');
+    }
+
+    const balance = await this.vaultContract.getDeptBalance(orgId, deptId);
+    return ethers.formatUnits(balance, 6);
+  }
+
   async executeAllocation(orgId: number, ruleId: number): Promise<string> {
     if (!this.ruleEngineContract) {
       throw new Error('RuleEngine contract not initialized');
+    }
+    if (!this.signer) {
+      throw new Error('Missing PRIVATE_KEY environment variable for contract interactions');
     }
 
     const tx = await this.ruleEngineContract.executeAllocation(orgId, ruleId);
@@ -87,6 +106,9 @@ export class SmartContractService {
   async executeDistributions(orgId: number, ruleIds: number[], zkProof: string): Promise<string> {
     if (!this.ruleEngineContract) {
       throw new Error('RuleEngine contract not initialized');
+    }
+    if (!this.signer) {
+      throw new Error('Missing PRIVATE_KEY environment variable for contract interactions');
     }
 
     const tx = await this.ruleEngineContract.executeDistributions(orgId, ruleIds, zkProof);

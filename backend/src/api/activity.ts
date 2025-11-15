@@ -1,9 +1,14 @@
 import { Router } from 'express';
 import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
 import { Transaction } from '../models/Transaction';
 
 const router = Router();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('Missing JWT_SECRET environment variable');
+}
 
 // Middleware to extract user from token
 const getUser = async (req: any): Promise<string | null> => {
@@ -12,7 +17,7 @@ const getUser = async (req: any): Promise<string | null> => {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
     return decoded.userId;
   } catch (error) {
     return null;
@@ -24,15 +29,6 @@ router.get('/', async (req, res) => {
     const userId = await getUser(req);
     if (!userId) {
       return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    // MOCK MODE: Return empty activity if MongoDB not connected
-    const mockMode = process.env.MOCK_AUTH === 'true' || !mongoose.connection.readyState;
-    if (mockMode) {
-      return res.json({
-        transactions: [],
-        total: 0,
-      });
     }
 
     const limit = parseInt(req.query.limit as string) || 10;
@@ -70,10 +66,7 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error('Get activity error:', error);
     // Return empty on error
-    res.json({
-      transactions: [],
-      total: 0,
-    });
+    res.status(500).json({ error: 'Failed to get activity' });
   }
 });
 

@@ -1,8 +1,14 @@
 import axios from 'axios';
 
+const baseURL = import.meta.env.VITE_API_URL;
+
+if (!baseURL) {
+  throw new Error('Missing VITE_API_URL. Define the backend base URL in the frontend environment variables.');
+}
+
 // Create axios instance with default config
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',

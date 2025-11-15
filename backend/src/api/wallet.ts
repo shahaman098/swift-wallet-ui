@@ -1,13 +1,18 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import jwt from 'jsonwebtoken';
-import mongoose from 'mongoose';
 import { Wallet } from '../models/Wallet';
 import { Transaction } from '../models/Transaction';
 import { User } from '../models/User';
 import { smartContractService } from '../services/smartContract';
 
 const router = Router();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('Missing JWT_SECRET environment variable');
+}
 
 // Middleware to extract user from token
 const getUser = async (req: any): Promise<string | null> => {
@@ -16,7 +21,7 @@ const getUser = async (req: any): Promise<string | null> => {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
     return decoded.userId;
   } catch (error) {
     return null;
@@ -30,25 +35,15 @@ router.get('/balance', async (req, res) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    // MOCK MODE: Return mock balance if MongoDB not connected
-    const mockMode = process.env.MOCK_AUTH === 'true' || !mongoose.connection.readyState;
-    if (mockMode) {
-      return res.json({ balance: 1326 });
-    }
-
     const wallet = await Wallet.findOne({ userId });
     if (!wallet) {
-      // Create wallet if it doesn't exist with initial balance of $1326
-      const newWallet = new Wallet({ userId, balance: 1326, currency: 'USD' });
-      await newWallet.save();
-      return res.json({ balance: 1326 });
+      return res.status(404).json({ error: 'Wallet not found' });
     }
 
     res.json({ balance: wallet.balance });
   } catch (error) {
     console.error('Balance error:', error);
-    // Fallback to mock balance if database error
-    res.json({ balance: 1326 });
+    res.status(500).json({ error: 'Failed to fetch balance' });
   }
 });
 

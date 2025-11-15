@@ -36,6 +36,7 @@ const TreasuryRules = () => {
   const [allocationRules, setAllocationRules] = useState<AllocationRule[]>([]);
   const [distributionRules, setDistributionRules] = useState<DistributionRule[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,34 +45,14 @@ const TreasuryRules = () => {
 
   const loadRules = async () => {
     try {
-      // Mock data for now - replace with actual API calls
-      setAllocationRules([
-        {
-          id: 'alloc-1',
-          allocationType: 'Percentage',
-          sourceDept: 'dept-1',
-          targetDept: 'dept-2',
-          bps: 2500,
-          amount: 0,
-          cap: 10000,
-          active: true
-        }
-      ]);
-      
-      setDistributionRules([
-        {
-          id: 'dist-1',
-          fromDept: 'dept-1',
-          recipient: '0x1234...5678',
-          amount: 5000,
-          bps: 0,
-          frequency: 'Monthly',
-          confidential: false,
-          active: true
-        }
-      ]);
-    } catch (error) {
-      console.error('Failed to load rules:', error);
+      // Backend endpoints are not implemented yet; surface clear messaging instead of mock data.
+      await treasuryAPI.getOrgs();
+      setAllocationRules([]);
+      setDistributionRules([]);
+      setError('Rule management is not implemented. Connect backend storage before using this page.');
+    } catch (err) {
+      console.error('Failed to load rules:', err);
+      setError('Unable to load rules. Ensure the treasury backend is running with rule storage enabled.');
     } finally {
       setLoading(false);
     }
@@ -133,7 +114,9 @@ const TreasuryRules = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                {allocationRules.length > 0 ? (
+                {error ? (
+                  <p className="text-muted-foreground text-center py-8">{error}</p>
+                ) : allocationRules.length > 0 ? (
                   <div className="space-y-4">
                     {allocationRules.map((rule) => (
                       <div key={rule.id} className="p-4 rounded-xl liquid-glass">
@@ -180,7 +163,9 @@ const TreasuryRules = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                {distributionRules.length > 0 ? (
+                {error ? (
+                  <p className="text-muted-foreground text-center py-8">{error}</p>
+                ) : distributionRules.length > 0 ? (
                   <div className="space-y-4">
                     {distributionRules.map((rule) => (
                       <div key={rule.id} className="p-4 rounded-xl liquid-glass">

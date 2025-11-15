@@ -2,7 +2,6 @@ import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { z } from 'zod';
-import mongoose from 'mongoose';
 import { User } from '../models/User';
 import { Wallet } from '../models/Wallet';
 
@@ -18,6 +17,12 @@ const loginSchema = z.object({
   email: z.string().email(),
   password: z.string()
 });
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('Missing JWT_SECRET environment variable');
+}
 
 router.post('/signup', async (req, res) => {
   try {
@@ -48,18 +53,16 @@ router.post('/signup', async (req, res) => {
     });
     await user.save();
 
-    // Create wallet for user with initial balance of $1326
+    // Create wallet for user with zero balance
     const wallet = new Wallet({
       userId: user._id,
-      balance: 1326,
-      currency: 'USD',
     });
     await wallet.save();
 
     // Generate JWT token
     const token = jwt.sign(
       { userId: user._id.toString(), email: user.email },
-      process.env.JWT_SECRET || 'your-secret-key',
+      JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -91,29 +94,8 @@ router.post('/signup', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = loginSchema.parse(req.body);
-    
-    // MOCK MODE: Allow any login if MOCK_AUTH is enabled or MongoDB is not connected
-    const mockMode = process.env.MOCK_AUTH === 'true' || !mongoose.connection.readyState;
-    
-    if (mockMode) {
-      console.log('🔓 Mock login mode: Allowing login without database');
-      // Generate a mock user ID
-      const mockUserId = 'mock-user-' + Date.now();
-      const mockName = email.split('@')[0] || 'User';
-      
-      const token = jwt.sign(
-        { userId: mockUserId, email: email },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '7d' }
-      );
 
-      return res.json({
-        token,
-        user: { id: mockUserId, name: mockName, email: email }
-      });
-    }
-    
-    // REAL MODE: Check database
+    // Check database
     const user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
@@ -126,7 +108,7 @@ router.post('/login', async (req, res) => {
 
     const token = jwt.sign(
       { userId: user._id.toString(), email: user.email },
-      process.env.JWT_SECRET || 'your-secret-key',
+      JWT_SECRET,
       { expiresIn: '7d' }
     );
 

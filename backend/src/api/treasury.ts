@@ -9,34 +9,11 @@ import { arcService } from '../services/arc';
 
 const router = Router();
 
-// In-memory storage for rules (TODO: Move to MongoDB)
-interface AllocationRule {
-  id: string;
-  orgId: string;
-  allocationType: 'Percentage' | 'FixedAmount' | 'Residual';
-  sourceDept: string;
-  targetDept: string;
-  bps: number;
-  amount: number;
-  cap: number;
-  active: boolean;
-}
+const JWT_SECRET = process.env.JWT_SECRET;
 
-interface DistributionRule {
-  id: string;
-  orgId: string;
-  fromDept: string;
-  recipient: string;
-  amount: number;
-  bps: number;
-  frequency: 'None' | 'Daily' | 'Weekly' | 'Monthly';
-  confidential: boolean;
-  lastExecuted: number;
-  active: boolean;
+if (!JWT_SECRET) {
+  throw new Error('Missing JWT_SECRET environment variable');
 }
-
-const allocationRules = new Map<string, AllocationRule>();
-const distributionRules = new Map<string, DistributionRule>();
 
 // Middleware to extract user from token
 const getUser = async (req: any): Promise<string | null> => {
@@ -45,7 +22,7 @@ const getUser = async (req: any): Promise<string | null> => {
     if (!authHeader || !authHeader.startsWith('Bearer ')) return null;
     
     const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as any;
+    const decoded = jwt.verify(token, JWT_SECRET) as any;
     return decoded.userId;
   } catch (error) {
     return null;
@@ -84,13 +61,13 @@ router.post('/orgs', async (req, res) => {
 
     const { name, smartAccount } = z.object({
       name: z.string(),
-      smartAccount: z.string()
+      smartAccount: z.string().min(1)
     }).parse(req.body);
 
     // Create org in MongoDB
     const org = new Organization({
       name,
-      smartAccount: smartAccount || '0x0000000000000000000000000000000000000000',
+      smartAccount,
       active: true,
       userId,
     });
@@ -227,8 +204,7 @@ router.get('/orgs/:orgId/departments', async (req, res) => {
         try {
           const orgIdNum = parseInt(org._id.toString().slice(-8), 16) % 1000000;
           const deptIdNum = parseInt(dept._id.toString().slice(-8), 16) % 1000000;
-          onchainBalance = await smartContractService.getOrgBalance(orgIdNum);
-          // In production, would call getDeptBalance
+          onchainBalance = await smartContractService.getDeptBalance?.(orgIdNum, deptIdNum) ?? null;
         } catch (error) {
           // Contract not available
         }
@@ -252,125 +228,16 @@ router.get('/orgs/:orgId/departments', async (req, res) => {
 });
 
 // Allocation Rules
-router.post('/orgs/:orgId/allocation-rules', async (req, res) => {
-  try {
-    const data = z.object({
-      allocationType: z.enum(['Percentage', 'FixedAmount', 'Residual']),
-      sourceDept: z.string(),
-      targetDept: z.string(),
-      bps: z.number().min(0).max(10000),
-      amount: z.number().optional(),
-      cap: z.number().optional()
-    }).parse(req.body);
-
-    const ruleId = `alloc-${Date.now()}`;
-    const rule: AllocationRule = {
-      id: ruleId,
-      orgId: req.params.orgId,
-      ...data,
-      amount: data.amount || 0,
-      cap: data.cap || 0,
-      active: true
-    };
-    allocationRules.set(ruleId, rule);
-
-    res.json(rule);
-  } catch (error) {
-    res.status(400).json({ error: 'Invalid request' });
-  }
+router.post('/orgs/:orgId/allocation-rules', (_req, res) => {
+  res.status(501).json({ error: 'Allocation rule management is not implemented. Persist rules in the database and update this endpoint.' });
 });
 
-// Distribution Rules
-router.post('/orgs/:orgId/distribution-rules', async (req, res) => {
-  try {
-    const data = z.object({
-      fromDept: z.string(),
-      recipient: z.string(),
-      amount: z.number().optional(),
-      bps: z.number().min(0).max(10000).optional(),
-      frequency: z.enum(['None', 'Daily', 'Weekly', 'Monthly']),
-      confidential: z.boolean().optional()
-    }).parse(req.body);
-
-    const ruleId = `dist-${Date.now()}`;
-    const rule: DistributionRule = {
-      id: ruleId,
-      orgId: req.params.orgId,
-      ...data,
-      amount: data.amount || 0,
-      bps: data.bps || 0,
-      confidential: data.confidential || false,
-      lastExecuted: 0,
-      active: true
-    };
-    distributionRules.set(ruleId, rule);
-
-    res.json(rule);
-  } catch (error) {
-    res.status(400).json({ error: 'Invalid request' });
-  }
+router.post('/orgs/:orgId/distribution-rules', (_req, res) => {
+  res.status(501).json({ error: 'Distribution rule management is not implemented. Persist rules in the database and update this endpoint.' });
 });
 
-// Execute Rules
-router.post('/orgs/:orgId/execute-allocations', async (req, res) => {
-  try {
-    const userId = await getUser(req);
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    // Verify org exists and user owns it
-    const org = await Organization.findOne({
-      _id: req.params.orgId,
-      userId,
-    });
-
-    if (!org) {
-      return res.status(404).json({ error: 'Org not found' });
-    }
-
-    const { ruleIds } = z.object({
-      ruleIds: z.array(z.string())
-    }).parse(req.body);
-
-    const results = [];
-
-    for (const ruleId of ruleIds) {
-      try {
-        // Execute on smart contract
-        const orgIdNum = parseInt(org._id.toString().slice(-8), 16) % 1000000;
-        const ruleIdNum = parseInt(ruleId.slice(-8), 16) % 1000000;
-        
-        const txHash = await smartContractService.executeAllocation(orgIdNum, ruleIdNum);
-
-        // Create transaction record
-        const transaction = new Transaction({
-          userId,
-          orgId: org._id,
-          type: 'allocation',
-          amount: 0, // Would calculate from contract
-          status: 'completed',
-          txHash,
-          ruleId,
-        });
-        await transaction.save();
-
-        results.push({ ruleId, success: true, txHash });
-      } catch (error: any) {
-        console.error(`Failed to execute rule ${ruleId}:`, error);
-        results.push({ 
-          ruleId, 
-          success: false, 
-          error: error.message || 'Execution failed' 
-        });
-      }
-    }
-
-    res.json({ results });
-  } catch (error) {
-    console.error('Execute allocations error:', error);
-    res.status(400).json({ error: 'Invalid request' });
-  }
+router.post('/orgs/:orgId/execute-allocations', (_req, res) => {
+  res.status(501).json({ error: 'Allocation execution is not implemented. Implement smart contract calls before enabling this endpoint.' });
 });
 
 export { router as treasuryRouter };
