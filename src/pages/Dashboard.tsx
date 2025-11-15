@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { TrendingUp, Activity, PieChartIcon } from "lucide-react";
+import { useBalances } from "@/hooks/use-balances";
 
 interface Transaction {
   id: string;
@@ -43,6 +44,7 @@ const monthlyData = [
 ];
 
 const Dashboard = () => {
+  const { data: balances, isLoading: balancesLoading } = useBalances();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,9 +57,8 @@ const Dashboard = () => {
       return;
     }
 
-    // Simulate API call
+    // Simulate API call for recent transactions.
     setTimeout(() => {
-      setBalance(1234.56);
       setTransactions([
         {
           id: '1',
@@ -149,7 +150,11 @@ const Dashboard = () => {
         </motion.div>
 
         <div className="space-y-8">
-          <BalanceCard balance={balance} loading={loading} />
+          <BalanceCard
+            balance={balances?.totalUsd ?? balance}
+            loading={balancesLoading}
+            changePct={balances?.changePct}
+          />
           
           <ActionButtons />
 

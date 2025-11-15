@@ -1,11 +1,13 @@
-import { DollarSign, TrendingUp } from "lucide-react";
+import { DollarSign, Info, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface BalanceCardProps {
   balance: number;
   loading?: boolean;
+  changePct?: number;
 }
 
 const sparklineData = [
@@ -18,7 +20,7 @@ const sparklineData = [
   { value: 1234.56 },
 ];
 
-const BalanceCard = ({ balance, loading = false }: BalanceCardProps) => {
+const BalanceCard = ({ balance, loading = false, changePct = 2.5 }: BalanceCardProps) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -101,7 +103,25 @@ const BalanceCard = ({ balance, loading = false }: BalanceCardProps) => {
               >
                 <DollarSign className="h-5 w-5 text-white/90" />
               </motion.div>
-              <p className="text-sm font-semibold text-white/90 tracking-wide uppercase">Available Balance</p>
+              <p className="text-sm font-semibold text-white/90 tracking-wide uppercase">
+                Available Balance
+              </p>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="ml-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-white/80 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                      aria-label="Balance information"
+                    >
+                      <Info className="h-3 w-3" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right">
+                    Includes USDC across all supported networks (Ethereum, Base, Arbitrum, Arc).
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             <motion.div
               className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20"
@@ -147,7 +167,10 @@ const BalanceCard = ({ balance, loading = false }: BalanceCardProps) => {
                   className="flex items-center gap-1 text-[#3CF276]"
                 >
                   <TrendingUp className="h-4 w-4" />
-                  <span className="text-sm font-semibold">+2.5% this month</span>
+                  <span className="text-sm font-semibold">
+                    {changePct >= 0 ? "+" : "-"}
+                    {Math.abs(changePct).toFixed(1)}% this month
+                  </span>
                 </motion.div>
               </motion.div>
 
