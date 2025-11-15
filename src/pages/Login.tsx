@@ -75,6 +75,28 @@ const Login = () => {
 
       {/* Arc-Inspired Background Elements */}
       
+      {/* Animated Expanding Arc Rings - Pulse Effect */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        {[0, 1, 2].map((i) => (
+          <motion.div
+            key={i}
+            className="absolute w-[300px] h-[300px] rounded-full border-2 border-cyan-400/10"
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{
+              scale: [0.8, 2.5, 2.5],
+              opacity: [0, 0.15, 0],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeOut",
+              delay: i * 2.5,
+            }}
+            style={{ filter: "blur(1px)" }}
+          />
+        ))}
+      </div>
+
       {/* Rotating Arc Halo behind card */}
       <motion.div
         className="absolute inset-0 flex items-center justify-center pointer-events-none"
@@ -97,8 +119,49 @@ const Login = () => {
         />
       </motion.div>
 
-      {/* Blockchain Network Nodes - Top Left */}
-      <svg className="absolute top-10 left-10 w-64 h-64 opacity-5 md:opacity-8 pointer-events-none" viewBox="0 0 200 200">
+      {/* Floating Parallax Orbs */}
+      <motion.div
+        className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-gradient-to-br from-cyan-400/10 to-blue-500/5 blur-2xl pointer-events-none"
+        animate={{
+          x: [0, 50, 0],
+          y: [0, -30, 0],
+          scale: [1, 1.2, 1],
+        }}
+        transition={{
+          duration: 15,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        className="absolute bottom-1/3 right-1/4 w-40 h-40 rounded-full bg-gradient-to-br from-violet-400/8 to-purple-500/5 blur-2xl pointer-events-none"
+        animate={{
+          x: [0, -40, 0],
+          y: [0, 40, 0],
+          scale: [1, 1.15, 1],
+        }}
+        transition={{
+          duration: 18,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        className="absolute top-1/2 right-1/3 w-36 h-36 rounded-full bg-gradient-to-br from-blue-400/6 to-cyan-500/4 blur-3xl pointer-events-none"
+        animate={{
+          x: [0, 30, 0],
+          y: [0, -50, 0],
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 20,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      {/* Animated Blockchain Particle Network - Full Canvas */}
+      <svg className="absolute inset-0 w-full h-full opacity-5 md:opacity-8 pointer-events-none" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
         <defs>
           <filter id="glow">
             <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
@@ -107,7 +170,120 @@ const Login = () => {
               <feMergeNode in="SourceGraphic"/>
             </feMerge>
           </filter>
+          <filter id="glow-intense">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
+        
+        {/* Particle Network - Top Left Cluster */}
+        <motion.circle cx="150" cy="100" r="2.5" fill="#31D2F7" filter="url(#glow)"
+          animate={{ opacity: [0.4, 0.8, 0.4], r: [2.5, 3, 2.5] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.circle cx="220" cy="80" r="2" fill="#4A44F2" filter="url(#glow)"
+          animate={{ opacity: [0.3, 0.7, 0.3], r: [2, 2.5, 2] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        />
+        <motion.circle cx="290" cy="120" r="2.5" fill="#31D2F7" filter="url(#glow)"
+          animate={{ opacity: [0.4, 0.75, 0.4], r: [2.5, 3, 2.5] }}
+          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        />
+        <motion.circle cx="180" cy="180" r="2" fill="#9D4EDD" filter="url(#glow)"
+          animate={{ opacity: [0.3, 0.6, 0.3], r: [2, 2.8, 2] }}
+          transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+        />
+        <motion.circle cx="260" cy="200" r="2.5" fill="#31D2F7" filter="url(#glow)"
+          animate={{ opacity: [0.4, 0.8, 0.4], r: [2.5, 3.2, 2.5] }}
+          transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+        />
+        
+        {/* Animated Connecting Lines - Top Left */}
+        <motion.line x1="150" y1="100" x2="220" y2="80" stroke="#31D2F7" strokeWidth="0.8" opacity="0.1"
+          animate={{ opacity: [0.05, 0.2, 0.05], strokeWidth: [0.8, 1, 0.8] }}
+          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.line x1="220" y1="80" x2="290" y2="120" stroke="#4A44F2" strokeWidth="0.8" opacity="0.1"
+          animate={{ opacity: [0.05, 0.18, 0.05], strokeWidth: [0.8, 1, 0.8] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        />
+        <motion.line x1="150" y1="100" x2="180" y2="180" stroke="#31D2F7" strokeWidth="0.8" opacity="0.1"
+          animate={{ opacity: [0.05, 0.22, 0.05], strokeWidth: [0.8, 1, 0.8] }}
+          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        />
+        <motion.line x1="180" y1="180" x2="260" y2="200" stroke="#9D4EDD" strokeWidth="0.8" opacity="0.1"
+          animate={{ opacity: [0.05, 0.19, 0.05], strokeWidth: [0.8, 1, 0.8] }}
+          transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+        />
+        <motion.line x1="290" y1="120" x2="260" y2="200" stroke="#31D2F7" strokeWidth="0.8" opacity="0.1"
+          animate={{ opacity: [0.05, 0.21, 0.05], strokeWidth: [0.8, 1, 0.8] }}
+          transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+        />
+
+        {/* Particle Network - Bottom Right Cluster */}
+        <motion.circle cx="950" cy="600" r="2.5" fill="#31D2F7" filter="url(#glow)"
+          animate={{ opacity: [0.4, 0.75, 0.4], r: [2.5, 3.2, 2.5] }}
+          transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+        />
+        <motion.circle cx="1020" cy="630" r="2.5" fill="#4A44F2" filter="url(#glow)"
+          animate={{ opacity: [0.3, 0.7, 0.3], r: [2.5, 3, 2.5] }}
+          transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+        />
+        <motion.circle cx="1070" cy="570" r="2" fill="#9D4EDD" filter="url(#glow)"
+          animate={{ opacity: [0.4, 0.8, 0.4], r: [2, 2.8, 2] }}
+          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
+        />
+        <motion.circle cx="980" cy="520" r="2.5" fill="#31D2F7" filter="url(#glow)"
+          animate={{ opacity: [0.3, 0.65, 0.3], r: [2.5, 3.1, 2.5] }}
+          transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        />
+        <motion.circle cx="900" cy="550" r="2" fill="#4A44F2" filter="url(#glow)"
+          animate={{ opacity: [0.4, 0.7, 0.4], r: [2, 2.7, 2] }}
+          transition={{ duration: 4.3, repeat: Infinity, ease: "easeInOut", delay: 1.8 }}
+        />
+
+        {/* Animated Connecting Lines - Bottom Right */}
+        <motion.line x1="950" y1="600" x2="1020" y2="630" stroke="#31D2F7" strokeWidth="0.8" opacity="0.1"
+          animate={{ opacity: [0.05, 0.21, 0.05], strokeWidth: [0.8, 1, 0.8] }}
+          transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+        />
+        <motion.line x1="1020" y1="630" x2="1070" y2="570" stroke="#4A44F2" strokeWidth="0.8" opacity="0.1"
+          animate={{ opacity: [0.05, 0.19, 0.05], strokeWidth: [0.8, 1, 0.8] }}
+          transition={{ duration: 5.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
+        />
+        <motion.line x1="980" y1="520" x2="1070" y2="570" stroke="#9D4EDD" strokeWidth="0.8" opacity="0.1"
+          animate={{ opacity: [0.05, 0.22, 0.05], strokeWidth: [0.8, 1, 0.8] }}
+          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 1.2 }}
+        />
+        <motion.line x1="950" y1="600" x2="980" y2="520" stroke="#31D2F7" strokeWidth="0.8" opacity="0.1"
+          animate={{ opacity: [0.05, 0.2, 0.05], strokeWidth: [0.8, 1, 0.8] }}
+          transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+        />
+        <motion.line x1="900" y1="550" x2="950" y2="600" stroke="#4A44F2" strokeWidth="0.8" opacity="0.1"
+          animate={{ opacity: [0.05, 0.18, 0.05], strokeWidth: [0.8, 1, 0.8] }}
+          transition={{ duration: 4.3, repeat: Infinity, ease: "easeInOut", delay: 1.8 }}
+        />
+
+        {/* Center Distributed Particles */}
+        <motion.circle cx="600" cy="250" r="2" fill="#31D2F7" filter="url(#glow)"
+          animate={{ opacity: [0.3, 0.6, 0.3], r: [2, 2.5, 2], cy: [250, 260, 250] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.circle cx="450" cy="400" r="2.5" fill="#9D4EDD" filter="url(#glow)"
+          animate={{ opacity: [0.4, 0.7, 0.4], r: [2.5, 3, 2.5], cx: [450, 460, 450] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        />
+        <motion.circle cx="750" cy="450" r="2" fill="#4A44F2" filter="url(#glow)"
+          animate={{ opacity: [0.3, 0.65, 0.3], r: [2, 2.8, 2], cy: [450, 440, 450] }}
+          transition={{ duration: 6.5, repeat: Infinity, ease: "easeInOut", delay: 1.5 }}
+        />
+      </svg>
+
+      {/* Blockchain Network Nodes - Top Left */}
+      <svg className="absolute top-10 left-10 w-64 h-64 opacity-5 md:opacity-8 pointer-events-none" viewBox="0 0 200 200">
         {/* Nodes */}
         <motion.circle cx="50" cy="50" r="4" fill="#31D2F7" filter="url(#glow)"
           animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.2, 1] }}
