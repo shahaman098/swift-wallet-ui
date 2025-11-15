@@ -7,6 +7,8 @@ import TransactionItem from "@/components/TransactionItem";
 import Loading from "@/components/Loading";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
+import { TrendingUp, Activity, PieChartIcon } from "lucide-react";
 
 interface Transaction {
   id: string;
@@ -16,6 +18,29 @@ interface Transaction {
   date: string;
   status: 'completed' | 'pending';
 }
+
+// Chart data
+const weeklyData = [
+  { day: 'Mon', amount: 850 },
+  { day: 'Tue', amount: 920 },
+  { day: 'Wed', amount: 1050 },
+  { day: 'Thu', amount: 980 },
+  { day: 'Fri', amount: 1150 },
+  { day: 'Sat', amount: 1100 },
+  { day: 'Sun', amount: 1234.56 },
+];
+
+const categoryData = [
+  { name: 'Income', value: 2500, color: '#3CF276' },
+  { name: 'Expenses', value: 1265.44, color: '#4A44F2' },
+  { name: 'Savings', value: 1234.56, color: '#31D2F7' },
+];
+
+const monthlyData = [
+  { month: 'Jan', income: 2100, expenses: 1200 },
+  { month: 'Feb', income: 2300, expenses: 1400 },
+  { month: 'Mar', income: 2500, expenses: 1265.44 },
+];
 
 const Dashboard = () => {
   const [balance, setBalance] = useState(0);
