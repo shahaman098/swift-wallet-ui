@@ -1,0 +1,191 @@
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
+import InputField from "@/components/InputField";
+import Loading from "@/components/Loading";
+import { Wallet } from "lucide-react";
+import { motion } from "framer-motion";
+
+const Signup = () => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (password !== confirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure your passwords match.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      localStorage.setItem('authToken', 'demo-token-' + Date.now());
+      toast({
+        title: "Account created",
+        description: "Welcome to PayWallet!",
+      });
+      navigate('/dashboard');
+    }, 1000);
+  };
+
+  return (
+    <div className="min-h-screen premium-gradient relative flex items-center justify-center p-4 overflow-hidden">
+      {/* Animated background blobs */}
+      <motion.div
+        className="absolute top-20 right-20 w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl dark:opacity-30 opacity-10"
+        animate={{
+          x: [0, -100, 0],
+          y: [0, 50, 0],
+          scale: [1, 1.2, 1],
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        className="absolute bottom-20 left-20 w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl dark:opacity-30 opacity-10"
+        animate={{
+          x: [0, 100, 0],
+          y: [0, -50, 0],
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 11,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      
+      {/* Arc background - dark mode only */}
+      <div className="absolute inset-0 opacity-0 dark:opacity-100 pointer-events-none">
+        {[...Array(40)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute w-1 h-1 bg-primary/30 rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              scale: [1, 1.5, 1],
+              opacity: [0.3, 0.6, 0.3],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 2,
+            }}
+          />
+        ))}
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-10 w-full max-w-md"
+      >
+        <Card className="liquid-glass-premium hover-lift shimmer border-0 shadow-2xl">
+          <CardHeader className="space-y-6 text-center pb-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="mx-auto w-16 h-16 arc-gradient rounded-2xl flex items-center justify-center shadow-xl"
+            >
+              <Wallet className="h-8 w-8 text-white" />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <CardTitle className="text-3xl font-bold text-foreground">Create account</CardTitle>
+              <CardDescription className="text-muted-foreground mt-2 text-base">
+                Join PayWallet today
+              </CardDescription>
+            </motion.div>
+          </CardHeader>
+          
+          <CardContent>
+            <motion.form
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
+              <InputField
+                label="Full Name"
+                placeholder="John Doe"
+                value={name}
+                onChange={setName}
+                required
+              />
+
+              <InputField
+                label="Email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={setEmail}
+                required
+              />
+              
+              <InputField
+                label="Password"
+                type="password"
+                placeholder="Create a password"
+                value={password}
+                onChange={setPassword}
+                required
+              />
+
+              <InputField
+                label="Confirm Password"
+                type="password"
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                required
+              />
+
+              <Button 
+                type="submit" 
+                disabled={loading}
+                className="w-full h-14 text-lg font-semibold arc-gradient hover-lift ripple-effect shadow-xl border-0 text-white"
+              >
+                {loading ? <Loading text="" /> : "Create Account"}
+              </Button>
+
+              <p className="text-center text-sm text-muted-foreground">
+                Already have an account?{" "}
+                <Link to="/login" className="text-primary hover:text-primary/80 font-semibold transition-colors underline">
+                  Sign in
+                </Link>
+              </p>
+            </motion.form>
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  );
+};
+
+export default Signup;
