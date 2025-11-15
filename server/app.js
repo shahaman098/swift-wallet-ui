@@ -1,12 +1,16 @@
 import http from 'node:http';
 import { URL } from 'node:url';
 import { DataStore } from './store.js';
+import { DatabaseStore } from './db-store.js';
 import {
   hashPassword,
   verifyPassword,
   generateToken,
   verifyToken,
 } from './auth.js';
+import { DataPipeline } from './data-pipeline.js';
+import { KycKybService } from './kyc-kyb.js';
+import { SanctionsScreeningService } from './sanctions-screening.js';
 import {
   setCorsHeaders,
   sendJson,
@@ -80,6 +84,18 @@ function handleError(error, res) {
 }
 
 export function createApp(store = new DataStore()) {
+  // Initialize services
+  let sanctionsService, kycKybService, dataPipeline;
+  try {
+    sanctionsService = new SanctionsScreeningService(store);
+    kycKybService = new KycKybService(store);
+    dataPipeline = new DataPipeline(store, sanctionsService, kycKybService);
+  } catch (error) {
+    console.error('Failed to initialize services:', error);
+    // Services will be undefined, which will cause errors if used
+    // But at least the server can start
+  }
+
   const server = http.createServer(async (req, res) => {
     setCorsHeaders(res);
 
@@ -122,6 +138,31 @@ export function createApp(store = new DataStore()) {
           email,
           passwordHash: hashPassword(password),
         });
+
+        // Process user registration through data pipeline
+        if (dataPipeline) {
+          try {
+            await dataPipeline.processUserRegistration(user);
+          } catch (error) {
+            console.error('Pipeline processing error during signup:', error);
+            // Continue with signup even if pipeline fails
+          }
+        }
+
+        // Create audit log
+        try {
+          await store.createAuditLog({
+            userId: user.id,
+            action: 'create_user',
+            entityType: 'user',
+            entityId: user.id,
+            changes: { email: user.email, name: user.name },
+            ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+            userAgent: req.headers['user-agent'],
+          });
+        } catch (error) {
+          console.error('Audit log error:', error);
+        }
 
         const token = generateToken(user.id);
 
@@ -270,6 +311,39 @@ export function createApp(store = new DataStore()) {
           return;
         }
 
+        // Process transaction through data pipeline (sanctions screening, KYC check)
+        let pipelineResult = null;
+        if (dataPipeline) {
+          try {
+            const transactionData = {
+              userId: user.id,
+              type: 'send',
+              amount,
+              recipient,
+              note,
+              chainKey: sourceChain,
+              sourceChain,
+              destinationChain,
+            };
+
+            pipelineResult = await dataPipeline.processTransaction(transactionData);
+            
+            if (pipelineResult && pipelineResult.blocked) {
+              sendJson(res, 403, {
+                message: pipelineResult.reason === 'sanctions_screening' 
+                  ? 'Transaction blocked due to sanctions screening'
+                  : 'Transaction requires KYC verification',
+                reason: pipelineResult.reason,
+                details: pipelineResult,
+              });
+              return;
+            }
+          } catch (error) {
+            console.error('Pipeline processing error:', error);
+            // Continue with transaction even if pipeline fails
+          }
+        }
+
         // Update source chain balance (deduct)
         const updatedUser = await store.updateChainBalance(user.id, sourceChain, -amount);
 
@@ -280,6 +354,9 @@ export function createApp(store = new DataStore()) {
 
         const chainBalance = await store.getChainBalance(user.id, sourceChain);
         const settlementState = useCCTP ? 'burning' : 'completed';
+
+        // Get sanctions screening result if available
+        const sanctionsResult = pipelineResult?.screeningResult || null;
 
         const transaction = await store.addTransaction({
           userId: user.id,
@@ -292,7 +369,24 @@ export function createApp(store = new DataStore()) {
           destinationChain,
           settlementState,
           balanceAfter: chainBalance,
+          sanctionsScreened: true,
+          sanctionsResult: sanctionsResult,
         });
+
+        // Create audit log
+        try {
+          await store.createAuditLog({
+            userId: user.id,
+            action: 'create_transaction',
+            entityType: 'transaction',
+            entityId: transaction.id,
+            changes: { type: 'send', amount, recipient, chain: sourceChain },
+            ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+            userAgent: req.headers['user-agent'],
+          });
+        } catch (error) {
+          console.error('Audit log error:', error);
+        }
 
         sendJson(res, 201, {
           balance: chainBalance,
@@ -1226,6 +1320,199 @@ export function createApp(store = new DataStore()) {
         try {
           const balance = await getTreasuryBalance(contractAddress, chainKey);
           sendJson(res, 200, { balance });
+        } catch (error) {
+          sendJson(res, 500, { message: error.message });
+        }
+        return;
+      }
+
+      // KYC/KYB Endpoints
+      if (method === 'POST' && url.pathname === '/api/kyc/submit') {
+        const user = await authenticate(req, res, store);
+        if (!user) {
+          return;
+        }
+
+        if (!kycKybService) {
+          sendJson(res, 503, { message: 'KYC service not available' });
+          return;
+        }
+
+        const body = await parseJsonBody(req);
+        try {
+          const record = await kycKybService.submitKyc(user.id, {
+            documentType: body.documentType,
+            documentNumber: body.documentNumber,
+            firstName: body.firstName,
+            lastName: body.lastName,
+            dateOfBirth: body.dateOfBirth,
+            address: body.address,
+            country: body.country,
+            documentImage: body.documentImage,
+            selfieImage: body.selfieImage,
+            provider: body.provider,
+            autoVerify: body.autoVerify === true, // For testing
+          });
+
+          sendJson(res, 201, { record });
+        } catch (error) {
+          sendJson(res, 500, { message: error.message });
+        }
+        return;
+      }
+
+      if (method === 'POST' && url.pathname === '/api/kyb/submit') {
+        const user = await authenticate(req, res, store);
+        if (!user) {
+          return;
+        }
+
+        if (!kycKybService) {
+          sendJson(res, 503, { message: 'KYB service not available' });
+          return;
+        }
+
+        const body = await parseJsonBody(req);
+        try {
+          const record = await kycKybService.submitKyb(user.id, {
+            documentType: body.documentType,
+            documentNumber: body.documentNumber,
+            businessName: body.businessName,
+            businessType: body.businessType,
+            registrationNumber: body.registrationNumber,
+            taxId: body.taxId,
+            address: body.address,
+            country: body.country,
+            incorporationDate: body.incorporationDate,
+            beneficialOwners: body.beneficialOwners,
+            authorizedSignatories: body.authorizedSignatories,
+            documentImage: body.documentImage,
+            provider: body.provider,
+            autoVerify: body.autoVerify === true, // For testing
+          });
+
+          sendJson(res, 201, { record });
+        } catch (error) {
+          sendJson(res, 500, { message: error.message });
+        }
+        return;
+      }
+
+      if (method === 'GET' && url.pathname === '/api/kyc-kyb/status') {
+        const user = await authenticate(req, res, store);
+        if (!user) {
+          return;
+        }
+
+        if (!kycKybService) {
+          sendJson(res, 503, { message: 'KYC/KYB service not available' });
+          return;
+        }
+
+        try {
+          const status = await kycKybService.getVerificationStatus(user.id);
+          sendJson(res, 200, status);
+        } catch (error) {
+          sendJson(res, 500, { message: error.message });
+        }
+        return;
+      }
+
+      if (method === 'GET' && url.pathname === '/api/kyc-kyb/requirements') {
+        const user = await authenticate(req, res, store);
+        if (!user) {
+          return;
+        }
+
+        if (!kycKybService) {
+          sendJson(res, 503, { message: 'KYC/KYB service not available' });
+          return;
+        }
+
+        const transactionAmount = Number(url.searchParams.get('amount')) || 0;
+        try {
+          const requirements = await kycKybService.checkVerificationRequirement(
+            user.id,
+            transactionAmount
+          );
+          sendJson(res, 200, requirements);
+        } catch (error) {
+          sendJson(res, 500, { message: error.message });
+        }
+        return;
+      }
+
+      // Sanctions Screening Endpoints
+      if (method === 'POST' && url.pathname === '/api/sanctions/screen') {
+        const user = await authenticate(req, res, store);
+        if (!user) {
+          return;
+        }
+
+        if (!sanctionsService) {
+          sendJson(res, 503, { message: 'Sanctions screening service not available' });
+          return;
+        }
+
+        const body = await parseJsonBody(req);
+        const screeningType = body.type || 'address'; // address, name, email
+        const value = body.value || '';
+
+        if (!value) {
+          sendJson(res, 400, { message: 'Value to screen is required' });
+          return;
+        }
+
+        try {
+          let result;
+          if (screeningType === 'address') {
+            result = await sanctionsService.screenAddress(value, user.id);
+          } else {
+            result = await sanctionsService.screenName(value, user.id, screeningType);
+          }
+
+          sendJson(res, 200, result);
+        } catch (error) {
+          sendJson(res, 500, { message: error.message });
+        }
+        return;
+      }
+
+      if (method === 'GET' && url.pathname === '/api/sanctions/history') {
+        const user = await authenticate(req, res, store);
+        if (!user) {
+          return;
+        }
+
+        if (!sanctionsService) {
+          sendJson(res, 503, { message: 'Sanctions screening service not available' });
+          return;
+        }
+
+        const limit = Number(url.searchParams.get('limit')) || 50;
+        try {
+          const history = await sanctionsService.getScreeningHistory(user.id, limit);
+          sendJson(res, 200, { screenings: history });
+        } catch (error) {
+          sendJson(res, 500, { message: error.message });
+        }
+        return;
+      }
+
+      if (method === 'POST' && url.pathname === '/api/sanctions/rescreen') {
+        const user = await authenticate(req, res, store);
+        if (!user) {
+          return;
+        }
+
+        if (!sanctionsService) {
+          sendJson(res, 503, { message: 'Sanctions screening service not available' });
+          return;
+        }
+
+        try {
+          const result = await sanctionsService.rescreenUser(user.id);
+          sendJson(res, 200, result);
         } catch (error) {
           sendJson(res, 500, { message: error.message });
         }

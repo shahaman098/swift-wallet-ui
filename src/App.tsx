@@ -16,6 +16,7 @@ import TreasuryAutomation from "./pages/TreasuryAutomation";
 import PolicyManagement from "./pages/PolicyManagement";
 import TreasuryOperations from "./pages/TreasuryOperations";
 import NotFound from "./pages/NotFound";
+import LegalDisclaimer from "./components/LegalDisclaimer";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      <LegalDisclaimer />
     </TooltipProvider>
   </QueryClientProvider>
 );

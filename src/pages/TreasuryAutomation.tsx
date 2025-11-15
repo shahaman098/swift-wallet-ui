@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -170,7 +171,9 @@ export default function TreasuryAutomation() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+      <Navbar />
+      <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-6">
         <h1 className="text-3xl font-bold mb-2">Treasury Automation</h1>
         <p className="text-muted-foreground">
@@ -382,6 +385,7 @@ export default function TreasuryAutomation() {
             )}
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );
