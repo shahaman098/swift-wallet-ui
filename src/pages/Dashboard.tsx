@@ -87,20 +87,65 @@ const Dashboard = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 relative overflow-hidden">
+      {/* Arc Network Background */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <svg className="w-full h-full" viewBox="0 0 1000 1000">
+          {[...Array(20)].map((_, i) => (
+            <motion.circle
+              key={i}
+              cx={Math.random() * 1000}
+              cy={Math.random() * 1000}
+              r="2"
+              fill="#4A44F2"
+              animate={{
+                opacity: [0.2, 0.8, 0.2],
+                scale: [1, 1.5, 1],
+              }}
+              transition={{
+                duration: 3 + Math.random() * 2,
+                repeat: Infinity,
+                delay: Math.random() * 2,
+              }}
+            />
+          ))}
+          {/* Connecting lines */}
+          {[...Array(10)].map((_, i) => (
+            <motion.line
+              key={`line-${i}`}
+              x1={Math.random() * 1000}
+              y1={Math.random() * 1000}
+              x2={Math.random() * 1000}
+              y2={Math.random() * 1000}
+              stroke="#31D2F7"
+              strokeWidth="0.5"
+              opacity="0.1"
+              animate={{
+                opacity: [0.05, 0.15, 0.05],
+              }}
+              transition={{
+                duration: 4 + Math.random() * 2,
+                repeat: Infinity,
+                delay: Math.random() * 2,
+              }}
+            />
+          ))}
+        </svg>
+      </div>
+
       <Navbar />
       
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-4 py-8 max-w-7xl relative z-10">
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-[#4A44F2] via-[#31D2F7] to-[#4A44F2] bg-clip-text text-transparent mb-2">
+          <h1 className="text-5xl md:text-6xl font-bold text-arc-gradient mb-2 animate-fade-in">
             Dashboard
           </h1>
-          <p className="text-muted-foreground text-lg">Manage your money with ease</p>
+          <p className="text-muted-foreground text-lg">Manage your money with Arc-powered insights</p>
         </motion.div>
 
         <div className="space-y-8">
@@ -108,13 +153,170 @@ const Dashboard = () => {
           
           <ActionButtons />
 
+          {/* Financial Insights Section */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
+            className="space-y-6"
           >
-            <Card className="backdrop-blur-sm bg-card/50 border border-border/50 shadow-xl">
-              <CardHeader>
+            <div className="flex items-center gap-3">
+              <motion.div
+                className="w-1.5 h-10 bg-gradient-to-b from-primary via-accent to-primary rounded-full"
+                animate={{ scaleY: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <h2 className="text-3xl font-bold text-arc-gradient">Financial Insights</h2>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Weekly Trend Chart */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5 }}
+                className="hover-lift"
+              >
+                <Card className="liquid-glass-premium border-0 shadow-xl rounded-3xl overflow-hidden shimmer h-full">
+                  <CardHeader className="border-b border-white/10 bg-gradient-to-br from-primary/5 to-transparent">
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                      <TrendingUp className="h-5 w-5 text-primary" />
+                      Weekly Trend
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ResponsiveContainer width="100%" height={200}>
+                      <AreaChart data={weeklyData}>
+                        <defs>
+                          <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#4A44F2" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#31D2F7" stopOpacity={0.1}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="day" stroke="#888" fontSize={12} />
+                        <YAxis stroke="#888" fontSize={12} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            background: 'rgba(10, 15, 45, 0.9)', 
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="amount" 
+                          stroke="#4A44F2" 
+                          strokeWidth={3}
+                          fillOpacity={1} 
+                          fill="url(#colorAmount)"
+                          animationDuration={1500}
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Category Distribution */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.6 }}
+                className="hover-lift"
+              >
+                <Card className="liquid-glass-premium border-0 shadow-xl rounded-3xl overflow-hidden shimmer h-full">
+                  <CardHeader className="border-b border-white/10 bg-gradient-to-br from-accent/5 to-transparent">
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                      <PieChartIcon className="h-5 w-5 text-accent" />
+                      Distribution
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ResponsiveContainer width="100%" height={200}>
+                      <PieChart>
+                        <Pie
+                          data={categoryData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={60}
+                          outerRadius={80}
+                          paddingAngle={5}
+                          dataKey="value"
+                          animationDuration={1500}
+                        >
+                          {categoryData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip 
+                          contentStyle={{ 
+                            background: 'rgba(10, 15, 45, 0.9)', 
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="flex justify-center gap-4 mt-4">
+                      {categoryData.map((cat, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full" style={{ background: cat.color }} />
+                          <span className="text-sm text-muted-foreground">{cat.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+
+              {/* Monthly Comparison */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7 }}
+                className="lg:col-span-2 hover-lift"
+              >
+                <Card className="liquid-glass-premium border-0 shadow-xl rounded-3xl overflow-hidden shimmer">
+                  <CardHeader className="border-b border-white/10 bg-gradient-to-br from-primary/5 to-transparent">
+                    <CardTitle className="flex items-center gap-2 text-xl">
+                      <Activity className="h-5 w-5 text-primary" />
+                      Monthly Comparison
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-6">
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={monthlyData}>
+                        <XAxis dataKey="month" stroke="#888" fontSize={12} />
+                        <YAxis stroke="#888" fontSize={12} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            background: 'rgba(10, 15, 45, 0.9)', 
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            backdropFilter: 'blur(10px)'
+                          }}
+                        />
+                        <Bar dataKey="income" fill="#3CF276" radius={[8, 8, 0, 0]} animationDuration={1500} />
+                        <Bar dataKey="expenses" fill="#4A44F2" radius={[8, 8, 0, 0]} animationDuration={1500} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Recent Activity */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.5 }}
+            className="hover-lift"
+          >
+            <Card className="liquid-glass-premium border-0 shadow-xl rounded-3xl overflow-hidden shimmer">
+              <CardHeader className="border-b border-white/10 bg-gradient-to-br from-primary/5 to-transparent">
                 <CardTitle className="text-2xl font-bold flex items-center gap-2">
                   <motion.div
                     className="w-1 h-8 bg-gradient-to-b from-primary to-accent rounded-full"
@@ -124,7 +326,7 @@ const Dashboard = () => {
                   Recent Activity
                 </CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {loading ? (
                   <Loading text="Loading transactions..." />
                 ) : transactions.length > 0 ? (
@@ -132,9 +334,9 @@ const Dashboard = () => {
                     {transactions.map((transaction, index) => (
                       <motion.div
                         key={transaction.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.5 + index * 0.1 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.9 + index * 0.1 }}
                       >
                         <TransactionItem {...transaction} />
                       </motion.div>
