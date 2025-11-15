@@ -31,9 +31,9 @@ const weeklyData = [
 ];
 
 const categoryData = [
-  { name: 'Income', value: 2500, color: '#3CF276' },
-  { name: 'Expenses', value: 1265.44, color: '#4A44F2' },
-  { name: 'Savings', value: 1234.56, color: '#31D2F7' },
+  { name: 'Income', value: 2500, color: 'hsl(152, 61%, 49%)' },
+  { name: 'Expenses', value: 1265.44, color: 'hsl(228, 100%, 65%)' },
+  { name: 'Savings', value: 1234.56, color: 'hsl(187, 85%, 53%)' },
 ];
 
 const monthlyData = [
@@ -89,7 +89,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20 relative overflow-hidden">
       {/* Arc Network Background */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none">
+      <div className="absolute inset-0 opacity-[0.08] pointer-events-none">
         <svg className="w-full h-full" viewBox="0 0 1000 1000">
           {[...Array(20)].map((_, i) => (
             <motion.circle
@@ -97,9 +97,9 @@ const Dashboard = () => {
               cx={Math.random() * 1000}
               cy={Math.random() * 1000}
               r="2"
-              fill="#4A44F2"
+              className="fill-primary"
               animate={{
-                opacity: [0.2, 0.8, 0.2],
+                opacity: [0.3, 0.7, 0.3],
                 scale: [1, 1.5, 1],
               }}
               transition={{
@@ -117,9 +117,9 @@ const Dashboard = () => {
               y1={Math.random() * 1000}
               x2={Math.random() * 1000}
               y2={Math.random() * 1000}
-              stroke="#31D2F7"
+              className="stroke-accent"
               strokeWidth="0.5"
-              opacity="0.1"
+              opacity="0.2"
               animate={{
                 opacity: [0.05, 0.15, 0.05],
               }}
@@ -189,25 +189,35 @@ const Dashboard = () => {
                       <AreaChart data={weeklyData}>
                         <defs>
                           <linearGradient id="colorAmount" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#4A44F2" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#31D2F7" stopOpacity={0.1}/>
+                            <stop offset="5%" stopColor="hsl(228, 100%, 65%)" stopOpacity={0.5}/>
+                            <stop offset="95%" stopColor="hsl(187, 85%, 53%)" stopOpacity={0.05}/>
                           </linearGradient>
                         </defs>
-                        <XAxis dataKey="day" stroke="#888" fontSize={12} />
-                        <YAxis stroke="#888" fontSize={12} />
+                        <XAxis 
+                          dataKey="day" 
+                          stroke="hsl(var(--muted-foreground))" 
+                          fontSize={12}
+                          opacity={0.7}
+                        />
+                        <YAxis 
+                          stroke="hsl(var(--muted-foreground))" 
+                          fontSize={12}
+                          opacity={0.7}
+                        />
                         <Tooltip 
                           contentStyle={{ 
-                            background: 'rgba(10, 15, 45, 0.9)', 
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            background: 'hsl(var(--card))', 
+                            border: '1px solid hsl(var(--border))',
                             borderRadius: '12px',
-                            backdropFilter: 'blur(10px)'
+                            backdropFilter: 'blur(10px)',
+                            color: 'hsl(var(--foreground))'
                           }}
                         />
                         <Area 
                           type="monotone" 
                           dataKey="amount" 
-                          stroke="#4A44F2" 
-                          strokeWidth={3}
+                          stroke="hsl(228, 100%, 65%)" 
+                          strokeWidth={2.5}
                           fillOpacity={1} 
                           fill="url(#colorAmount)"
                           animationDuration={1500}
@@ -251,10 +261,11 @@ const Dashboard = () => {
                         </Pie>
                         <Tooltip 
                           contentStyle={{ 
-                            background: 'rgba(10, 15, 45, 0.9)', 
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            background: 'hsl(var(--card))', 
+                            border: '1px solid hsl(var(--border))',
                             borderRadius: '12px',
-                            backdropFilter: 'blur(10px)'
+                            backdropFilter: 'blur(10px)',
+                            color: 'hsl(var(--foreground))'
                           }}
                         />
                       </PieChart>
@@ -288,18 +299,28 @@ const Dashboard = () => {
                   <CardContent className="pt-6">
                     <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={monthlyData}>
-                        <XAxis dataKey="month" stroke="#888" fontSize={12} />
-                        <YAxis stroke="#888" fontSize={12} />
+                        <XAxis 
+                          dataKey="month" 
+                          stroke="hsl(var(--muted-foreground))" 
+                          fontSize={12}
+                          opacity={0.7}
+                        />
+                        <YAxis 
+                          stroke="hsl(var(--muted-foreground))" 
+                          fontSize={12}
+                          opacity={0.7}
+                        />
                         <Tooltip 
                           contentStyle={{ 
-                            background: 'rgba(10, 15, 45, 0.9)', 
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            background: 'hsl(var(--card))', 
+                            border: '1px solid hsl(var(--border))',
                             borderRadius: '12px',
-                            backdropFilter: 'blur(10px)'
+                            backdropFilter: 'blur(10px)',
+                            color: 'hsl(var(--foreground))'
                           }}
                         />
-                        <Bar dataKey="income" fill="#3CF276" radius={[8, 8, 0, 0]} animationDuration={1500} />
-                        <Bar dataKey="expenses" fill="#4A44F2" radius={[8, 8, 0, 0]} animationDuration={1500} />
+                        <Bar dataKey="income" fill="hsl(152, 61%, 49%)" radius={[8, 8, 0, 0]} animationDuration={1500} />
+                        <Bar dataKey="expenses" fill="hsl(228, 100%, 65%)" radius={[8, 8, 0, 0]} animationDuration={1500} />
                       </BarChart>
                     </ResponsiveContainer>
                   </CardContent>
