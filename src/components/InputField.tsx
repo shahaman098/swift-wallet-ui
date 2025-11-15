@@ -43,7 +43,7 @@ const InputField = ({
         onChange={(e) => onChange(e.target.value)}
         required={required}
         disabled={disabled}
-        className="h-12 liquid-glass border-border/30 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all backdrop-blur-xl"
+        className="h-12 bg-background/50 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
       />
     </motion.div>
   );

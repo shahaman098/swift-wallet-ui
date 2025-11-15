@@ -26,7 +26,7 @@ const ActionButtons = () => {
         <div className="liquid-glass-premium rounded-3xl p-[1px] shimmer liquid-wave">
           <Button 
             onClick={() => navigate('/add-money')}
-            className="w-full h-auto py-8 flex flex-col gap-3 bg-gradient-to-br from-green-500 to-emerald-600 dark:from-[#3CF276] dark:to-[#2AB55E] hover:from-emerald-600 hover:to-green-500 dark:hover:from-[#2AB55E] dark:hover:to-[#3CF276] border-0 shadow-xl relative overflow-hidden group rounded-3xl ripple-effect transition-colors duration-300"
+            className="w-full h-auto py-8 flex flex-col gap-3 bg-gradient-to-br from-[#3CF276] to-[#2AB55E] hover:from-[#2AB55E] hover:to-[#3CF276] border-0 shadow-xl relative overflow-hidden group rounded-3xl ripple-effect"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             
@@ -56,7 +56,7 @@ const ActionButtons = () => {
         <div className="liquid-glass-premium rounded-3xl p-[1px] shimmer liquid-wave">
           <Button 
             onClick={() => navigate('/send-payment')}
-            className="w-full h-auto py-8 flex flex-col gap-3 bg-gradient-to-br from-indigo-500 to-blue-600 dark:from-[#4A44F2] dark:to-[#31D2F7] hover:from-blue-600 hover:to-indigo-500 dark:hover:from-[#31D2F7] dark:hover:to-[#4A44F2] border-0 shadow-xl relative overflow-hidden group rounded-3xl ripple-effect transition-colors duration-300"
+            className="w-full h-auto py-8 flex flex-col gap-3 bg-gradient-to-br from-[#4A44F2] to-[#31D2F7] hover:from-[#31D2F7] hover:to-[#4A44F2] border-0 shadow-xl relative overflow-hidden group rounded-3xl ripple-effect"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             

@@ -52,43 +52,17 @@ const AddMoney = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen premium-gradient relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
         <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />
-        
-        {/* Arc-themed background - visible in dark mode */}
-        <div className="absolute inset-0 opacity-0 dark:opacity-100 pointer-events-none">
-          <div className="absolute inset-0">
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-primary/30 rounded-full"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.3, 0.6, 0.3],
-                }}
-                transition={{
-                  duration: 3 + Math.random() * 2,
-                  repeat: Infinity,
-                  delay: Math.random() * 2,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-        
         <Navbar />
-        <main className="container mx-auto px-4 py-8 max-w-md relative z-10">
+        <main className="container mx-auto px-4 py-8 max-w-md">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
           >
-            <Card className="liquid-glass-premium hover-lift text-center overflow-hidden border-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
+            <Card className="backdrop-blur-sm bg-card/80 border-0 shadow-2xl text-center overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#3CF276]/10 via-transparent to-[#31D2F7]/10" />
               <CardContent className="pt-16 pb-12 relative">
                 <motion.div
                   initial={{ scale: 0 }}
@@ -130,34 +104,10 @@ const AddMoney = () => {
   }
 
   return (
-    <div className="min-h-screen premium-gradient relative overflow-hidden">
-      {/* Arc-themed background - visible in dark mode */}
-      <div className="absolute inset-0 opacity-0 dark:opacity-100 pointer-events-none">
-        <div className="absolute inset-0">
-          {[...Array(30)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-primary/30 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.3, 0.6, 0.3],
-              }}
-              transition={{
-                duration: 3 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 max-w-2xl relative z-10">
+      
+      <main className="container mx-auto px-4 py-8 max-w-md">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -175,12 +125,12 @@ const AddMoney = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ delay: 0.1 }}
         >
-          <Card className="liquid-glass-premium hover-lift shimmer border-0 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3" />
+          <Card className="backdrop-blur-sm bg-card/80 border-0 shadow-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#3CF276]/5 via-transparent to-[#31D2F7]/5" />
             <CardHeader className="relative">
-              <CardTitle className="text-3xl font-bold text-arc-gradient">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-[#3CF276] to-[#31D2F7] bg-clip-text text-transparent">
                 Add Money
               </CardTitle>
               <CardDescription className="text-base">Deposit funds to your account instantly</CardDescription>
@@ -199,30 +149,56 @@ const AddMoney = () => {
 
                   <div className="space-y-3">
                     <p className="text-sm font-semibold text-foreground">Quick amounts</p>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-4 gap-3">
                       {quickAmounts.map((quickAmount) => (
-                        <motion.button
-                          key={quickAmount}
-                          type="button"
-                          onClick={() => setAmount(quickAmount.toString())}
-                          whileHover={{ scale: 1.05, y: -4 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="liquid-glass hover-lift ripple-effect px-6 py-4 rounded-xl border border-border/30 hover:border-primary/50 hover:bg-primary/10 transition-all font-semibold text-foreground"
-                        >
-                          ${quickAmount}
-                        </motion.button>
+                        <motion.div key={quickAmount} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setAmount(quickAmount.toString())}
+                            className="h-14 w-full font-bold border-2 hover:border-primary hover:bg-primary/10"
+                          >
+                            ${quickAmount}
+                          </Button>
+                        </motion.div>
                       ))}
                     </div>
                   </div>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  disabled={loading}
-                  className="w-full h-14 text-lg font-semibold arc-gradient hover-lift ripple-effect shadow-xl border-0 text-white"
-                >
-                  {loading ? <Loading text="" /> : "Add Money"}
-                </Button>
+                <Card className="bg-gradient-to-br from-muted/50 to-muted/30 border-0">
+                  <CardContent className="p-5 space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Deposit amount</span>
+                      <span className="font-bold">
+                        ${amount ? parseFloat(amount).toFixed(2) : '0.00'}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Processing fee</span>
+                      <span className="font-bold text-[#3CF276]">Free</span>
+                    </div>
+                    <div className="h-px bg-border my-2" />
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>You'll receive</span>
+                      <span className="text-[#3CF276]">${amount ? parseFloat(amount).toFixed(2) : '0.00'}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-14 text-base font-bold bg-gradient-to-r from-[#3CF276] to-[#2AB55E] hover:from-[#2AB55E] hover:to-[#3CF276] border-0 shadow-xl"
+                    disabled={loading}
+                  >
+                    {loading ? <Loading text="" /> : "Add Money"}
+                  </Button>
+                </motion.div>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  💡 Funds will be available instantly in your account
+                </p>
               </form>
             </CardContent>
           </Card>

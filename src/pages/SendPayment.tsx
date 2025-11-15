@@ -61,43 +61,17 @@ const SendPayment = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen premium-gradient relative overflow-hidden">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
         <Confetti width={width} height={height} recycle={false} numberOfPieces={500} />
-        
-        {/* Arc-themed background */}
-        <div className="absolute inset-0 opacity-0 dark:opacity-100 pointer-events-none">
-          <div className="absolute inset-0">
-            {[...Array(20)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-1 h-1 bg-primary/30 rounded-full"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-                animate={{
-                  scale: [1, 1.5, 1],
-                  opacity: [0.3, 0.6, 0.3],
-                }}
-                transition={{
-                  duration: 3 + Math.random() * 2,
-                  repeat: Infinity,
-                  delay: Math.random() * 2,
-                }}
-              />
-            ))}
-          </div>
-        </div>
-        
         <Navbar />
-        <main className="container mx-auto px-4 py-8 max-w-md relative z-10">
+        <main className="container mx-auto px-4 py-8 max-w-md">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200 }}
           >
-            <Card className="liquid-glass-premium hover-lift text-center overflow-hidden border-0">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5" />
+            <Card className="backdrop-blur-sm bg-card/80 border-0 shadow-2xl text-center overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-[#4A44F2]/10 via-transparent to-[#31D2F7]/10" />
               <CardContent className="pt-16 pb-12 relative">
                 <motion.div
                   initial={{ scale: 0 }}
@@ -146,34 +120,10 @@ const SendPayment = () => {
   }
 
   return (
-    <div className="min-h-screen premium-gradient relative overflow-hidden">
-      {/* Arc-themed background */}
-      <div className="absolute inset-0 opacity-0 dark:opacity-100 pointer-events-none">
-        <div className="absolute inset-0">
-          {[...Array(30)].map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-primary/30 rounded-full"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-              }}
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.3, 0.6, 0.3],
-              }}
-              transition={{
-                duration: 3 + Math.random() * 2,
-                repeat: Infinity,
-                delay: Math.random() * 2,
-              }}
-            />
-          ))}
-        </div>
-      </div>
-      
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 max-w-2xl relative z-10">
+      
+      <main className="container mx-auto px-4 py-8 max-w-md">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -191,12 +141,12 @@ const SendPayment = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ delay: 0.1 }}
         >
-          <Card className="liquid-glass-premium hover-lift shimmer border-0 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/3" />
+          <Card className="backdrop-blur-sm bg-card/80 border-0 shadow-2xl overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-[#4A44F2]/5 via-transparent to-[#31D2F7]/5" />
             <CardHeader className="relative">
-              <CardTitle className="text-3xl font-bold text-arc-gradient">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-[#4A44F2] to-[#31D2F7] bg-clip-text text-transparent">
                 Send Payment
               </CardTitle>
               <CardDescription className="text-base">Transfer money instantly to anyone</CardDescription>
@@ -229,7 +179,7 @@ const SendPayment = () => {
                   />
                 </div>
 
-                <Card className="liquid-glass border-0">
+                <Card className="bg-gradient-to-br from-muted/50 to-muted/30 border-0">
                   <CardContent className="p-5 space-y-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Send amount</span>
@@ -238,26 +188,30 @@ const SendPayment = () => {
                       </span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Fee</span>
-                      <span className="font-bold text-primary">Free</span>
+                      <span className="text-muted-foreground">Transfer fee</span>
+                      <span className="font-bold text-[#3CF276]">Free</span>
                     </div>
-                    <div className="h-px bg-border" />
-                    <div className="flex justify-between text-base">
-                      <span className="font-semibold text-foreground">Total</span>
-                      <span className="font-bold text-foreground">
-                        ${amount ? parseFloat(amount).toFixed(2) : '0.00'}
-                      </span>
+                    <div className="h-px bg-border my-2" />
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Total</span>
+                      <span className="text-primary">${amount ? parseFloat(amount).toFixed(2) : '0.00'}</span>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Button 
-                  type="submit" 
-                  disabled={loading}
-                  className="w-full h-14 text-lg font-semibold arc-gradient hover-lift ripple-effect shadow-xl border-0 text-white"
-                >
-                  {loading ? <Loading text="" /> : "Send Payment"}
-                </Button>
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-14 text-base font-bold bg-gradient-to-r from-[#4A44F2] to-[#31D2F7] hover:from-[#31D2F7] hover:to-[#4A44F2] border-0 shadow-xl"
+                    disabled={loading}
+                  >
+                    {loading ? <Loading text="" /> : "Send Payment"}
+                  </Button>
+                </motion.div>
+
+                <p className="text-xs text-center text-muted-foreground">
+                  💡 Payment will be sent instantly
+                </p>
               </form>
             </CardContent>
           </Card>

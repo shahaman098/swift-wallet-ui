@@ -43,10 +43,10 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen premium-gradient relative flex items-center justify-center p-4 overflow-hidden">
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-[#0A0F2D] via-[#1a1f3d] to-[#0A0F2D]">
       {/* Animated background blobs */}
       <motion.div
-        className="absolute top-20 right-20 w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl dark:opacity-30 opacity-10"
+        className="absolute top-20 right-20 w-96 h-96 bg-[#31D2F7] rounded-full mix-blend-multiply filter blur-3xl opacity-20"
         animate={{
           x: [0, -100, 0],
           y: [0, 50, 0],
@@ -59,7 +59,7 @@ const Signup = () => {
         }}
       />
       <motion.div
-        className="absolute bottom-20 left-20 w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl dark:opacity-30 opacity-10"
+        className="absolute bottom-20 left-20 w-96 h-96 bg-[#4A44F2] rounded-full mix-blend-multiply filter blur-3xl opacity-20"
         animate={{
           x: [0, 100, 0],
           y: [0, -50, 0],
@@ -71,29 +71,6 @@ const Signup = () => {
           ease: "easeInOut",
         }}
       />
-      
-      {/* Arc background - dark mode only */}
-      <div className="absolute inset-0 opacity-0 dark:opacity-100 pointer-events-none">
-        {[...Array(40)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-primary/30 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.3, 0.6, 0.3],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
-      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -101,13 +78,13 @@ const Signup = () => {
         transition={{ duration: 0.6 }}
         className="relative z-10 w-full max-w-md"
       >
-        <Card className="liquid-glass-premium hover-lift shimmer border-0 shadow-2xl">
+        <Card className="backdrop-blur-2xl bg-white/10 border border-white/20 shadow-2xl">
           <CardHeader className="space-y-6 text-center pb-6">
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-              className="mx-auto w-16 h-16 arc-gradient rounded-2xl flex items-center justify-center shadow-xl"
+              className="mx-auto w-16 h-16 bg-gradient-to-br from-[#4A44F2] to-[#31D2F7] rounded-2xl flex items-center justify-center shadow-xl"
             >
               <Wallet className="h-8 w-8 text-white" />
             </motion.div>
@@ -116,8 +93,8 @@ const Signup = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <CardTitle className="text-3xl font-bold text-foreground">Create account</CardTitle>
-              <CardDescription className="text-muted-foreground mt-2 text-base">
+              <CardTitle className="text-3xl font-bold text-white">Create account</CardTitle>
+              <CardDescription className="text-white/70 mt-2 text-base">
                 Join PayWallet today
               </CardDescription>
             </motion.div>
@@ -166,17 +143,19 @@ const Signup = () => {
                 required
               />
 
-              <Button 
-                type="submit" 
-                disabled={loading}
-                className="w-full h-14 text-lg font-semibold arc-gradient hover-lift ripple-effect shadow-xl border-0 text-white"
-              >
-                {loading ? <Loading text="" /> : "Create Account"}
-              </Button>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  type="submit" 
+                  className="w-full h-14 text-base font-bold bg-gradient-to-r from-[#4A44F2] to-[#31D2F7] hover:from-[#31D2F7] hover:to-[#4A44F2] border-0 shadow-xl mt-2"
+                  disabled={loading}
+                >
+                  {loading ? <Loading text="" /> : "Create Account"}
+                </Button>
+              </motion.div>
 
-              <p className="text-center text-sm text-muted-foreground">
+              <p className="text-center text-sm text-white/70">
                 Already have an account?{" "}
-                <Link to="/login" className="text-primary hover:text-primary/80 font-semibold transition-colors underline">
+                <Link to="/login" className="text-[#31D2F7] hover:text-[#4A44F2] font-semibold transition-colors">
                   Sign in
                 </Link>
               </p>
