@@ -26,8 +26,14 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('authToken');
-      window.location.href = '/login';
+      // Don't redirect on 401 for auth endpoints (login/signup) - let the components handle it
+      const isAuthEndpoint = error.config?.url?.includes('/api/auth/');
+      
+      if (!isAuthEndpoint) {
+        // Only redirect to login for protected endpoints that require authentication
+        localStorage.removeItem('authToken');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

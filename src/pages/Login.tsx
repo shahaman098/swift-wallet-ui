@@ -26,33 +26,41 @@ const Login = () => {
 
       if (token) {
         localStorage.setItem("authToken", token);
+        toast({
+          title: "Login successful",
+          description: "Welcome back!",
+        });
+        navigate("/dashboard");
       }
-
-      // Check if this was a new account (status 201) or existing login (status 200)
-      const isNewAccount = response?.status === 201;
-      
-      toast({
-        title: isNewAccount ? "Account created!" : "Login successful",
-        description: response?.data?.message || (isNewAccount ? "Welcome to PayWallet!" : "Welcome back!"),
-      });
-      
-      navigate("/dashboard");
     } catch (error) {
       const axiosError = error as {
-        response?: { data?: { message?: string }; status?: number };
+        response?: { status?: number; data?: { message?: string } };
         message?: string;
       };
 
-      const description =
-        axiosError.response?.data?.message ||
-        axiosError.message ||
-        "Unable to sign in. Please try again.";
+      // If user doesn't exist (401), redirect to signup with pre-filled credentials
+      if (axiosError.response?.status === 401) {
+        toast({
+          title: "Account not found",
+          description: "Please create an account to continue.",
+          variant: "destructive",
+        });
+        // Navigate to signup with email and password pre-filled
+        navigate("/signup", {
+          state: { email, password },
+        });
+      } else {
+        const description =
+          axiosError.response?.data?.message ||
+          axiosError.message ||
+          "Unable to login. Please try again.";
 
-      toast({
-        title: "Sign in failed",
-        description,
-        variant: "destructive",
-      });
+        toast({
+          title: "Login failed",
+          description,
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }

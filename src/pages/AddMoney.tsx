@@ -11,7 +11,6 @@ import { ArrowLeft, CheckCircle2, Sparkles, Network } from "lucide-react";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/use-window-size";
-import { walletAPI } from "@/api/client";
 
 const AddMoney = () => {
   const [amount, setAmount] = useState("");
@@ -26,8 +25,7 @@ const AddMoney = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const depositAmount = parseFloat(amount);
-    if (!amount || depositAmount <= 0) {
+    if (!amount || parseFloat(amount) <= 0) {
       toast({
         title: "Invalid amount",
         description: "Please enter a valid amount.",
@@ -38,40 +36,19 @@ const AddMoney = () => {
 
     setLoading(true);
 
-    try {
-      const response = await walletAPI.deposit({ 
-        amount: depositAmount,
-        note: `Deposit of $${depositAmount.toFixed(2)}`
-      });
-      
+    // Simulate API call
+    setTimeout(() => {
       setLoading(false);
       setSuccess(true);
       toast({
         title: "Money added successfully",
-        description: `$${depositAmount.toFixed(2)} has been added to your account. Your new balance is $${response.data.balance.toFixed(2)}.`,
+        description: `$${parseFloat(amount).toFixed(2)} has been added to your account.`,
       });
       
       setTimeout(() => {
         navigate('/dashboard');
       }, 3000);
-    } catch (error) {
-      setLoading(false);
-      const axiosError = error as {
-        response?: { data?: { message?: string } };
-        message?: string;
-      };
-
-      const description =
-        axiosError.response?.data?.message ||
-        axiosError.message ||
-        "Unable to add money. Please try again.";
-
-      toast({
-        title: "Deposit failed",
-        description,
-        variant: "destructive",
-      });
-    }
+    }, 1500);
   };
 
   if (success) {

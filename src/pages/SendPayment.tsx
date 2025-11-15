@@ -11,7 +11,6 @@ import { ArrowLeft, CheckCircle2, Sparkles, Send as SendIcon } from "lucide-reac
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/use-window-size";
-import { walletAPI } from "@/api/client";
 
 const SendPayment = () => {
   const [recipient, setRecipient] = useState("");
@@ -26,8 +25,7 @@ const SendPayment = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const sendAmount = parseFloat(amount);
-    if (!amount || sendAmount <= 0) {
+    if (!amount || parseFloat(amount) <= 0) {
       toast({
         title: "Invalid amount",
         description: "Please enter a valid amount.",
@@ -47,41 +45,19 @@ const SendPayment = () => {
 
     setLoading(true);
 
-    try {
-      const response = await walletAPI.send({
-        amount: sendAmount,
-        recipient: recipient.trim(),
-        note: note.trim() || undefined,
-      });
-      
+    // Simulate API call
+    setTimeout(() => {
       setLoading(false);
       setSuccess(true);
       toast({
         title: "Payment sent",
-        description: `$${sendAmount.toFixed(2)} sent to ${recipient}. Your new balance is $${response.data.balance.toFixed(2)}.`,
+        description: `$${parseFloat(amount).toFixed(2)} sent to ${recipient}`,
       });
       
       setTimeout(() => {
         navigate('/dashboard');
       }, 3000);
-    } catch (error) {
-      setLoading(false);
-      const axiosError = error as {
-        response?: { data?: { message?: string } };
-        message?: string;
-      };
-
-      const description =
-        axiosError.response?.data?.message ||
-        axiosError.message ||
-        "Unable to send payment. Please try again.";
-
-      toast({
-        title: "Payment failed",
-        description,
-        variant: "destructive",
-      });
-    }
+    }, 1500);
   };
 
   if (success) {

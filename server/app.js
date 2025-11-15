@@ -107,35 +107,9 @@ export function createApp(store = new DataStore()) {
           return;
         }
 
-        let user = await store.findUserByEmail(email);
-        
-        // If user doesn't exist, auto-register them
-        if (!user) {
-          // Generate a name from email (e.g., "john.doe@example.com" -> "John Doe")
-          const emailParts = email.split('@')[0];
-          const nameParts = emailParts.split(/[._-]/);
-          const name = nameParts
-            .map(part => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-            .join(' ') || emailParts.charAt(0).toUpperCase() + emailParts.slice(1);
-          
-          user = await store.createUser({
-            name,
-            email,
-            passwordHash: hashPassword(password),
-          });
-          
-          const token = generateToken(user.id);
-          sendJson(res, 201, { 
-            token, 
-            user: formatUser(user),
-            message: 'Account created and logged in successfully'
-          });
-          return;
-        }
-
-        // User exists, verify password
-        if (!verifyPassword(password, user.passwordHash)) {
-          sendJson(res, 401, { message: 'Invalid password' });
+        const user = await store.findUserByEmail(email);
+        if (!user || !verifyPassword(password, user.passwordHash)) {
+          sendJson(res, 401, { message: 'Invalid email or password' });
           return;
         }
 
@@ -169,16 +143,9 @@ export function createApp(store = new DataStore()) {
           return;
         }
 
-        // Reload user to get latest balance (prevents race conditions)
-        const currentUser = await store.getUserById(user.id);
-        if (!currentUser) {
-          sendJson(res, 404, { message: 'User not found' });
-          return;
-        }
-
         const updatedUser = await store.updateUserBalance(
-          currentUser.id,
-          currentUser.balance + amount
+          user.id,
+          user.balance + amount
         );
 
         if (!updatedUser) {
@@ -187,7 +154,7 @@ export function createApp(store = new DataStore()) {
         }
 
         const transaction = await store.addTransaction({
-          userId: currentUser.id,
+          userId: user.id,
           type: 'deposit',
           amount,
           balanceAfter: updatedUser.balance,
@@ -222,21 +189,14 @@ export function createApp(store = new DataStore()) {
           return;
         }
 
-        // Reload user to get latest balance (prevents race conditions)
-        const currentUser = await store.getUserById(user.id);
-        if (!currentUser) {
-          sendJson(res, 404, { message: 'User not found' });
-          return;
-        }
-
-        if (currentUser.balance < amount) {
+        if (user.balance < amount) {
           sendJson(res, 400, { message: 'Insufficient funds' });
           return;
         }
 
         const updatedUser = await store.updateUserBalance(
-          currentUser.id,
-          currentUser.balance - amount
+          user.id,
+          user.balance - amount
         );
 
         if (!updatedUser) {
@@ -245,7 +205,7 @@ export function createApp(store = new DataStore()) {
         }
 
         const transaction = await store.addTransaction({
-          userId: currentUser.id,
+          userId: user.id,
           type: 'send',
           amount,
           recipient,
