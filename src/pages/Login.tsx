@@ -80,7 +80,7 @@ const Login = () => {
         {[0, 1, 2].map((i) => (
           <motion.div
             key={i}
-            className="absolute w-[300px] h-[300px] rounded-full border-2 border-cyan-400/10"
+            className="absolute w-[300px] h-[300px] rounded-full border-2 border-cyan-400/20"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{
               scale: [0.8, 2.5, 2.5],
@@ -161,7 +161,7 @@ const Login = () => {
       />
 
       {/* Animated Blockchain Particle Network - Full Canvas */}
-      <svg className="absolute inset-0 w-full h-full opacity-5 md:opacity-8 pointer-events-none" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <svg className="absolute inset-0 w-full h-full opacity-8 md:opacity-12 pointer-events-none" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
         <defs>
           <filter id="glow">
             <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
@@ -283,7 +283,7 @@ const Login = () => {
       </svg>
 
       {/* Blockchain Network Nodes - Top Left */}
-      <svg className="absolute top-10 left-10 w-64 h-64 opacity-5 md:opacity-8 pointer-events-none" viewBox="0 0 200 200">
+      <svg className="absolute top-10 left-10 w-64 h-64 opacity-10 md:opacity-15 pointer-events-none" viewBox="0 0 200 200">
         {/* Nodes */}
         <motion.circle cx="50" cy="50" r="4" fill="#31D2F7" filter="url(#glow)"
           animate={{ opacity: [0.3, 0.7, 0.3], scale: [1, 1.2, 1] }}
@@ -329,7 +329,7 @@ const Login = () => {
       </svg>
 
       {/* Blockchain Network Nodes - Bottom Right */}
-      <svg className="absolute bottom-10 right-10 w-56 h-56 opacity-5 md:opacity-8 pointer-events-none" viewBox="0 0 200 200">
+      <svg className="absolute bottom-10 right-10 w-56 h-56 opacity-10 md:opacity-15 pointer-events-none" viewBox="0 0 200 200">
         {/* Nodes */}
         <motion.circle cx="60" cy="140" r="3.5" fill="#31D2F7" filter="url(#glow)"
           animate={{ opacity: [0.4, 0.8, 0.4], scale: [1, 1.15, 1] }}
@@ -368,7 +368,7 @@ const Login = () => {
 
       {/* Data Flow Streams - Top Right Corner */}
       <motion.div 
-        className="absolute top-0 right-0 w-96 h-96 opacity-5 pointer-events-none"
+        className="absolute top-0 right-0 w-96 h-96 opacity-10 pointer-events-none"
         animate={{ x: [0, 20, 0], y: [0, -10, 0] }}
         transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
       >
@@ -408,7 +408,7 @@ const Login = () => {
 
       {/* Data Flow Streams - Bottom Left Corner */}
       <motion.div 
-        className="absolute bottom-0 left-0 w-96 h-96 opacity-5 pointer-events-none"
+        className="absolute bottom-0 left-0 w-96 h-96 opacity-10 pointer-events-none"
         animate={{ x: [0, -15, 0], y: [0, 15, 0] }}
         transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
       >
