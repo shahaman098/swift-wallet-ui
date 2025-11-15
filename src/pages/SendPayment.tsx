@@ -6,7 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import Navbar from "@/components/Navbar";
-import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
+import ArcFinalityAnimation from "@/components/ArcFinalityAnimation";
+import { ArrowLeft, CheckCircle2, Sparkles, Send as SendIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "@/hooks/use-window-size";
@@ -143,13 +144,13 @@ const SendPayment = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="backdrop-blur-sm bg-card/80 border-0 shadow-2xl overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-[#4A44F2]/5 via-transparent to-[#31D2F7]/5" />
-            <CardHeader className="relative">
-              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-[#4A44F2] to-[#31D2F7] bg-clip-text text-transparent">
+          <Card className="liquid-glass-premium border-0 shadow-2xl overflow-hidden hover-lift shimmer">
+            <CardHeader className="relative border-b border-white/10 bg-gradient-to-br from-primary/5 to-transparent">
+              <CardTitle className="text-3xl font-bold text-arc-gradient flex items-center gap-2">
+                <SendIcon className="h-8 w-8" />
                 Send Payment
               </CardTitle>
-              <CardDescription className="text-base">Transfer money instantly to anyone</CardDescription>
+              <CardDescription className="text-base">Transfer money via Gateway instantly</CardDescription>
             </CardHeader>
             <CardContent className="relative">
               <form onSubmit={handleSubmit} className="space-y-6">
