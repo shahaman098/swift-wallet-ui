@@ -28,6 +28,9 @@ const SendPayment = () => {
   const [settlementState, setSettlementState] = useState("");
   const [burnTxHash, setBurnTxHash] = useState("");
   const [mintTxHash, setMintTxHash] = useState("");
+  const [paymentId, setPaymentId] = useState("");
+  const [paymentState, setPaymentState] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { width, height } = useWindowSize();
@@ -107,28 +110,62 @@ const SendPayment = () => {
       setSettlementState(response.data.settlementState || 'completed');
       setBurnTxHash(response.data.burnTxHash || '');
       setMintTxHash(response.data.mintTxHash || '');
-      setSuccess(true);
+      setPaymentId(response.data.paymentId || '');
+      setPaymentState(response.data.paymentState || 'completed');
 
-      // Poll for settlement status if cross-chain
-      if (useCCTP && blockchain !== destinationChain && response.data.transferId) {
-        pollSettlementStatus(response.data.transferId);
+      // Check if payment is completed immediately
+      if (response.data.settlementState === 'completed' || response.data.paymentState === 'completed') {
+        setSuccess(true);
+        toast({
+          title: "Payment completed",
+          description: `$${parseFloat(amount).toFixed(2)} USDC sent successfully`,
+        });
+        // Navigate after user sees success state (user initiated, not automatic)
+        return;
       }
-      
-      toast({
-        title: "Payment sent",
-        description: useCCTP 
-          ? `$${parseFloat(amount).toFixed(2)} USDC sent via CCTP cross-chain transfer`
-          : `$${parseFloat(amount).toFixed(2)} USDC sent to ${recipient.substring(0, 6)}...${recipient.substring(38)}`,
-      });
-      
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 3000);
+
+      // For cross-chain, poll settlement status
+      if (useCCTP && blockchain !== destinationChain && response.data.transferId) {
+        setSuccess(true);
+        toast({
+          title: "Payment initiated",
+          description: `Cross-chain transfer in progress. Monitoring settlement...`,
+        });
+        pollSettlementStatus(response.data.transferId);
+      } else if (response.data.paymentState === 'pending' || response.data.settlementState === 'pending') {
+        setSuccess(true);
+        toast({
+          title: "Payment pending",
+          description: `Payment is being processed. Please wait...`,
+        });
+      } else {
+        setSuccess(true);
+        toast({
+          title: "Payment sent",
+          description: `$${parseFloat(amount).toFixed(2)} USDC sent to ${recipient.substring(0, 6)}...${recipient.substring(38)}`,
+        });
+      }
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || error.message || "Failed to send payment";
+      const errorReason = error.response?.data?.reason || 'unknown';
+      const paymentState = error.response?.data?.paymentState || 'failed';
+
+      setError(errorMessage);
+      setPaymentState(paymentState);
+      
+      // Provide specific guidance based on error reason
+      let description = errorMessage;
+      if (errorReason === 'sanctions_screening') {
+        description = 'Transaction blocked by sanctions screening. Please contact support.';
+      } else if (errorReason === 'kyc_required') {
+        description = 'Transaction requires KYC verification. Please verify your identity first.';
+      } else if (errorReason === 'insufficient_funds') {
+        description = 'Insufficient funds. Please add money to your account.';
+      }
+
       toast({
         title: "Payment failed",
-        description: errorMessage,
+        description,
         variant: "destructive",
       });
       setLoading(false);
@@ -148,7 +185,21 @@ const SendPayment = () => {
         setBurnTxHash(response.data.burnTxHash || '');
         setMintTxHash(response.data.mintTxHash || '');
 
-        if (response.data.settlementState === 'completed' || response.data.settlementState === 'failed') {
+        if (response.data.settlementState === 'completed') {
+          toast({
+            title: "Payment completed",
+            description: "Cross-chain transfer has been settled successfully!",
+          });
+          return; // Stop polling
+        }
+
+        if (response.data.settlementState === 'failed') {
+          setError('Cross-chain settlement failed');
+          toast({
+            title: "Settlement failed",
+            description: "The cross-chain transfer could not be completed.",
+            variant: "destructive",
+          });
           return; // Stop polling
         }
 
@@ -224,14 +275,12 @@ const SendPayment = () => {
                       <p className="font-medium">{note}</p>
                     </div>
                   )}
-                  <motion.div
-                    animate={{ opacity: [0.5, 1, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="flex items-center justify-center gap-2 text-sm text-muted-foreground"
+                  <Button
+                    onClick={() => navigate('/dashboard')}
+                    className="mt-6 bg-gradient-to-r from-[#4A44F2] to-[#31D2F7] hover:from-[#4A44F2]/90 hover:to-[#31D2F7]/90"
                   >
-                    <Sparkles className="h-4 w-4" />
-                    <span>Redirecting to dashboard...</span>
-                  </motion.div>
+                    Return to Dashboard
+                  </Button>
                 </motion.div>
               </CardContent>
             </Card>

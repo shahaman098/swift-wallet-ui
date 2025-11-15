@@ -7,6 +7,7 @@ import ActionButtons from "@/components/ActionButtons";
 import TransactionItem from "@/components/TransactionItem";
 import ArcAccountLink from "@/components/ArcAccountLink";
 import Loading from "@/components/Loading";
+import KYCStatus from "@/components/KYCStatus";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
@@ -233,6 +234,15 @@ const Dashboard = () => {
           </motion.div>
           
           <ActionButtons />
+
+          {/* KYC/KYB Status */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+          >
+            <KYCStatus />
+          </motion.div>
 
           {/* Arc Account Linkage */}
           {!hasArcAccount && (

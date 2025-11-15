@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { LogOut, Wallet } from "lucide-react";
+import { LogOut, Wallet, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import ThemeToggle from "@/components/ThemeToggle";
 
@@ -37,21 +37,38 @@ const Navbar = () => {
         <div className="flex items-center gap-2">
           <ThemeToggle />
           {isAuthenticated && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={handleLogout}
-                className="gap-2 hover:bg-destructive/10 hover:text-destructive transition-all"
+            <>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.15 }}
               >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline font-medium">Logout</span>
-              </Button>
-            </motion.div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/settings')}
+                  className="gap-2 hover:bg-primary/10 transition-all"
+                >
+                  <Settings className="h-4 w-4" />
+                  <span className="hidden sm:inline font-medium">Settings</span>
+                </Button>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleLogout}
+                  className="gap-2 hover:bg-destructive/10 hover:text-destructive transition-all"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline font-medium">Logout</span>
+                </Button>
+              </motion.div>
+            </>
           )}
         </div>
       </div>

@@ -11,6 +11,8 @@ import {
 import { DataPipeline } from './data-pipeline.js';
 import { KycKybService } from './kyc-kyb.js';
 import { SanctionsScreeningService } from './sanctions-screening.js';
+import { PaymentStateMachine } from './payment-state-machine.js';
+import { TelemetryService } from './telemetry.js';
 import {
   setCorsHeaders,
   sendJson,
@@ -85,11 +87,15 @@ function handleError(error, res) {
 
 export function createApp(store = new DataStore()) {
   // Initialize services
-  let sanctionsService, kycKybService, dataPipeline;
+  let sanctionsService, kycKybService, dataPipeline, telemetryService, paymentStateMachine;
   try {
+    telemetryService = new TelemetryService(store);
     sanctionsService = new SanctionsScreeningService(store);
     kycKybService = new KycKybService(store);
     dataPipeline = new DataPipeline(store, sanctionsService, kycKybService);
+    paymentStateMachine = new PaymentStateMachine(store, telemetryService);
+    
+    console.log('✅ All services initialized successfully');
   } catch (error) {
     console.error('Failed to initialize services:', error);
     // Services will be undefined, which will cause errors if used
@@ -110,7 +116,40 @@ export function createApp(store = new DataStore()) {
 
     try {
       if (method === 'GET' && url.pathname === '/health') {
-        sendJson(res, 200, { status: 'ok' });
+        const telemetryHealth = telemetryService ? telemetryService.getHealth() : null;
+        sendJson(res, 200, { 
+          status: 'ok',
+          services: {
+            telemetry: telemetryHealth,
+            dataPipeline: !!dataPipeline,
+            kycKyb: !!kycKybService,
+            sanctions: !!sanctionsService,
+            paymentStateMachine: !!paymentStateMachine,
+          }
+        });
+        return;
+      }
+
+      // Telemetry & Observability Endpoints
+      if (method === 'GET' && url.pathname === '/api/telemetry/metrics') {
+        if (!telemetryService) {
+          sendJson(res, 503, { message: 'Telemetry service not available' });
+          return;
+        }
+
+        const metrics = telemetryService.getAllMetrics();
+        sendJson(res, 200, { metrics });
+        return;
+      }
+
+      if (method === 'POST' && url.pathname === '/api/telemetry/clear') {
+        if (!telemetryService) {
+          sendJson(res, 503, { message: 'Telemetry service not available' });
+          return;
+        }
+
+        telemetryService.clearMetrics();
+        sendJson(res, 200, { message: 'Metrics cleared' });
         return;
       }
 
@@ -287,117 +326,209 @@ export function createApp(store = new DataStore()) {
         const destinationChain = typeof body.destinationChain === 'string' ? body.destinationChain : sourceChain;
         const useCCTP = body.useCCTP === true || (sourceChain !== destinationChain);
 
-        if (!Number.isFinite(amount) || amount <= 0) {
-          sendJson(res, 400, { message: 'Send amount must be greater than zero' });
-          return;
-        }
+        // Start telemetry trace
+        const traceId = telemetryService ? telemetryService.startTrace('payment_send', { userId: user.id }) : null;
 
-        if (!recipient) {
-          sendJson(res, 400, { message: 'Recipient is required' });
-          return;
-        }
+        try {
+          if (traceId && telemetryService) {
+            telemetryService.addSpan(traceId, 'validation_start');
+          }
 
-        if (!SUPPORTED_CHAINS[sourceChain]) {
-          sendJson(res, 400, { message: `Unsupported source chain: ${sourceChain}` });
-          return;
-        }
+          if (!Number.isFinite(amount) || amount <= 0) {
+            sendJson(res, 400, { message: 'Send amount must be greater than zero' });
+            if (traceId && telemetryService) await telemetryService.endTrace(traceId, false, { error: 'invalid_amount' });
+            return;
+          }
 
-        // Check chain-specific balance
-        const sourceBalance = await store.getChainBalance(user.id, sourceChain);
-        if (sourceBalance < amount) {
-          sendJson(res, 400, { 
-            message: `Insufficient funds on ${sourceChain}. Available: ${sourceBalance.toFixed(2)} USDC` 
-          });
-          return;
-        }
+          if (!recipient) {
+            sendJson(res, 400, { message: 'Recipient is required' });
+            if (traceId && telemetryService) await telemetryService.endTrace(traceId, false, { error: 'missing_recipient' });
+            return;
+          }
 
-        // Process transaction through data pipeline (sanctions screening, KYC check)
-        let pipelineResult = null;
-        if (dataPipeline) {
-          try {
-            const transactionData = {
+          if (!SUPPORTED_CHAINS[sourceChain]) {
+            sendJson(res, 400, { message: `Unsupported source chain: ${sourceChain}` });
+            if (traceId && telemetryService) await telemetryService.endTrace(traceId, false, { error: 'invalid_chain' });
+            return;
+          }
+
+          // Check chain-specific balance
+          const sourceBalance = await store.getChainBalance(user.id, sourceChain);
+          if (sourceBalance < amount) {
+            sendJson(res, 400, { 
+              message: `Insufficient funds on ${sourceChain}. Available: ${sourceBalance.toFixed(2)} USDC` 
+            });
+            if (traceId && telemetryService) await telemetryService.endTrace(traceId, false, { error: 'insufficient_funds' });
+            return;
+          }
+
+          // Create payment with state machine
+          let payment = null;
+          if (paymentStateMachine && telemetryService) {
+            payment = await paymentStateMachine.createPayment({
               userId: user.id,
-              type: 'send',
               amount,
               recipient,
-              note,
-              chainKey: sourceChain,
               sourceChain,
               destinationChain,
-            };
+              note,
+              metadata: { useCCTP, traceId },
+            });
 
-            pipelineResult = await dataPipeline.processTransaction(transactionData);
-            
-            if (pipelineResult && pipelineResult.blocked) {
-              sendJson(res, 403, {
-                message: pipelineResult.reason === 'sanctions_screening' 
-                  ? 'Transaction blocked due to sanctions screening'
-                  : 'Transaction requires KYC verification',
-                reason: pipelineResult.reason,
-                details: pipelineResult,
-              });
-              return;
-            }
-          } catch (error) {
-            console.error('Pipeline processing error:', error);
-            // Continue with transaction even if pipeline fails
+            // Transition to validating state
+            await paymentStateMachine.transitionState(payment, 'validating');
+            telemetryService.addSpan(traceId, 'payment_created', { paymentId: payment.id });
           }
-        }
 
-        // Update source chain balance (deduct)
-        const updatedUser = await store.updateChainBalance(user.id, sourceChain, -amount);
+          // Process transaction through data pipeline with retry logic
+          let pipelineResult = null;
+          if (dataPipeline && payment && paymentStateMachine) {
+            try {
+              const transactionData = {
+                id: payment.id,
+                userId: user.id,
+                type: 'send',
+                amount,
+                recipient,
+                note,
+                chainKey: sourceChain,
+                sourceChain,
+                destinationChain,
+              };
 
-        if (!updatedUser) {
-          sendJson(res, 404, { message: 'User not found' });
-          return;
-        }
+              pipelineResult = await paymentStateMachine.processWithRetry(
+                payment,
+                async () => {
+                  const result = await dataPipeline.processTransaction(transactionData);
+                  if (result && result.blocked) {
+                    const error = new Error(
+                      result.reason === 'sanctions_screening'
+                        ? 'Transaction blocked due to sanctions screening'
+                        : 'Transaction requires KYC verification'
+                    );
+                    error.pipelineResult = result;
+                    throw error;
+                  }
+                  return result;
+                },
+                { maxRetries: 2 }
+              );
 
-        const chainBalance = await store.getChainBalance(user.id, sourceChain);
-        const settlementState = useCCTP ? 'burning' : 'completed';
+              telemetryService.addSpan(traceId, 'pipeline_complete', { pipelineResult });
+              await paymentStateMachine.transitionState(payment, 'processing');
+            } catch (error) {
+              console.error('Pipeline processing error:', error);
+              
+              if (error.pipelineResult && error.pipelineResult.blocked) {
+                await paymentStateMachine.transitionState(payment, 'failed', {
+                  error: error.message,
+                  reason: error.pipelineResult.reason,
+                });
 
-        // Get sanctions screening result if available
-        const sanctionsResult = pipelineResult?.screeningResult || null;
+                sendJson(res, 403, {
+                  message: error.message,
+                  reason: error.pipelineResult.reason,
+                  details: error.pipelineResult,
+                  paymentId: payment.id,
+                  paymentState: payment.state,
+                });
 
-        const transaction = await store.addTransaction({
-          userId: user.id,
-          type: 'send',
-          amount,
-          recipient,
-          note,
-          chainKey: sourceChain,
-          sourceChain,
-          destinationChain,
-          settlementState,
-          balanceAfter: chainBalance,
-          sanctionsScreened: true,
-          sanctionsResult: sanctionsResult,
-        });
+                if (traceId && telemetryService) await telemetryService.endTrace(traceId, false, { error: 'pipeline_blocked' });
+                return;
+              }
+              
+              // Pipeline failed but allow transaction to continue
+              console.warn('Pipeline failed, continuing with transaction');
+            }
+          }
 
-        // Create audit log
-        try {
-          await store.createAuditLog({
+          // Update source chain balance (deduct)
+          const updatedUser = await store.updateChainBalance(user.id, sourceChain, -amount);
+
+          if (!updatedUser) {
+            if (payment && paymentStateMachine) {
+              await paymentStateMachine.transitionState(payment, 'failed', { error: 'user_not_found' });
+            }
+            sendJson(res, 404, { message: 'User not found' });
+            if (traceId && telemetryService) await telemetryService.endTrace(traceId, false, { error: 'user_not_found' });
+            return;
+          }
+
+          const chainBalance = await store.getChainBalance(user.id, sourceChain);
+          const settlementState = useCCTP ? 'pending' : 'completed';
+
+          // Transition payment state based on CCTP usage
+          if (payment && paymentStateMachine) {
+            if (useCCTP) {
+              await paymentStateMachine.transitionState(payment, 'pending', { settlementState });
+            } else {
+              await paymentStateMachine.transitionState(payment, 'completed', { settlementState });
+            }
+          }
+
+          // Get sanctions screening result if available
+          const sanctionsResult = pipelineResult?.screeningResult || null;
+
+          const transaction = await store.addTransaction({
             userId: user.id,
-            action: 'create_transaction',
-            entityType: 'transaction',
-            entityId: transaction.id,
-            changes: { type: 'send', amount, recipient, chain: sourceChain },
-            ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-            userAgent: req.headers['user-agent'],
+            type: 'send',
+            amount,
+            recipient,
+            note,
+            chainKey: sourceChain,
+            sourceChain,
+            destinationChain,
+            settlementState,
+            balanceAfter: chainBalance,
+            sanctionsScreened: true,
+            sanctionsResult: sanctionsResult,
+          });
+
+          telemetryService?.addSpan(traceId, 'transaction_created', { transactionId: transaction.id });
+
+          // Create audit log
+          try {
+            await store.createAuditLog({
+              userId: user.id,
+              action: 'create_transaction',
+              entityType: 'transaction',
+              entityId: transaction.id,
+              changes: { type: 'send', amount, recipient, chain: sourceChain },
+              ipAddress: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+              userAgent: req.headers['user-agent'],
+            });
+          } catch (error) {
+            console.error('Audit log error:', error);
+          }
+
+          // End trace successfully
+          if (traceId && telemetryService) {
+            await telemetryService.endTrace(traceId, true, { 
+              transactionId: transaction.id,
+              paymentId: payment?.id,
+              settlementState 
+            });
+          }
+
+          sendJson(res, 201, {
+            balance: chainBalance,
+            totalBalance: updatedUser.balance,
+            chain: sourceChain,
+            sourceChain,
+            destinationChain,
+            settlementState,
+            paymentId: payment?.id,
+            paymentState: payment?.state,
+            transaction: formatTransaction(transaction),
+            message: useCCTP ? 'Cross-chain transfer initiated via CCTP' : 'Transfer completed',
           });
         } catch (error) {
-          console.error('Audit log error:', error);
+          console.error('Send payment error:', error);
+          if (traceId && telemetryService) {
+            await telemetryService.endTrace(traceId, false, { error: error.message });
+          }
+          sendJson(res, 500, { message: error.message || 'Failed to process payment' });
         }
-
-        sendJson(res, 201, {
-          balance: chainBalance,
-          totalBalance: updatedUser.balance,
-          chain: sourceChain,
-          sourceChain,
-          destinationChain,
-          settlementState,
-          transaction: formatTransaction(transaction),
-          message: useCCTP ? 'Cross-chain transfer initiated via CCTP' : 'Transfer completed',
-        });
         return;
       }
 

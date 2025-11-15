@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowDownToLine, Send, Users, QrCode } from "lucide-react";
+import { ArrowDownToLine, Send, Users, QrCode, Building2 } from "lucide-react";
 import { motion } from "framer-motion";
 
 const ActionButtons = () => {
@@ -84,7 +84,7 @@ const ActionButtons = () => {
       </div>
 
       {/* Secondary Actions */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <motion.div 
           variants={buttonVariants} 
           whileHover="hover" 
@@ -121,6 +121,26 @@ const ActionButtons = () => {
             >
               <QrCode className="h-6 w-6 text-accent" />
               <span className="text-sm font-semibold">Request Payment</span>
+            </Button>
+          </div>
+        </motion.div>
+
+        <motion.div 
+          variants={buttonVariants} 
+          whileHover="hover" 
+          whileTap="tap"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <div className="liquid-glass rounded-2xl p-[1px]">
+            <Button 
+              onClick={() => navigate('/treasury-operations')}
+              variant="outline"
+              className="w-full h-auto py-6 flex flex-col gap-2 bg-card/50 hover:bg-card border-success/20 rounded-2xl"
+            >
+              <Building2 className="h-6 w-6 text-success" />
+              <span className="text-sm font-semibold">Treasury</span>
             </Button>
           </div>
         </motion.div>

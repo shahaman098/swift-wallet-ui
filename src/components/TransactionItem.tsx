@@ -1,35 +1,45 @@
-import { ArrowDownToLine, Send, Network, ArrowRight } from "lucide-react";
+import { useState } from "react";
+import { ArrowDownToLine, Send, Network, ArrowRight, Info } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import SettlementStatus from "./SettlementStatus";
+import TransactionDetailsModal from "./TransactionDetailsModal";
 
 interface TransactionItemProps {
+  id: string;
   type: 'deposit' | 'send';
   amount: number;
   recipient?: string;
   date: string;
-  status: 'completed' | 'pending';
+  status: 'completed' | 'pending' | 'failed';
   chainKey?: string;
   sourceChain?: string;
   destinationChain?: string;
   settlementState?: string;
   burnTxHash?: string;
   mintTxHash?: string;
+  note?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-const TransactionItem = ({ 
-  type, 
-  amount, 
-  recipient, 
-  date, 
-  status,
-  chainKey,
-  sourceChain,
-  destinationChain,
-  settlementState,
-  burnTxHash,
-  mintTxHash,
-}: TransactionItemProps) => {
+const TransactionItem = (props: TransactionItemProps) => {
+  const { 
+    type, 
+    amount, 
+    recipient, 
+    date, 
+    status,
+    chainKey,
+    sourceChain,
+    destinationChain,
+    settlementState,
+    burnTxHash,
+    mintTxHash,
+  } = props;
+
+  const [showDetails, setShowDetails] = useState(false);
   const isDeposit = type === 'deposit';
   const isCrossChain = sourceChain && destinationChain && sourceChain !== destinationChain;
   
@@ -40,7 +50,8 @@ const TransactionItem = ({
         x: 5,
         transition: { type: "spring", stiffness: 400, damping: 10 }
       }}
-      className="flex flex-col gap-3 p-4 rounded-2xl liquid-glass hover-lift border border-white/10 backdrop-blur-xl transition-all duration-300 group"
+      className="flex flex-col gap-3 p-4 rounded-2xl liquid-glass hover-lift border border-white/10 backdrop-blur-xl transition-all duration-300 group cursor-pointer"
+      onClick={() => setShowDetails(true)}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -93,27 +104,42 @@ const TransactionItem = ({
           </div>
         </div>
         
-        <div className="flex flex-col items-end gap-1">
-          <motion.p 
-            className={`font-bold text-lg ${
-              isDeposit ? 'text-accent' : 'text-primary'
-            }`}
-            initial={{ scale: 1 }}
-            whileHover={{ scale: 1.1 }}
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col items-end gap-1">
+            <motion.p 
+              className={`font-bold text-lg ${
+                isDeposit ? 'text-accent' : 'text-primary'
+              }`}
+              initial={{ scale: 1 }}
+              whileHover={{ scale: 1.1 }}
+            >
+              {isDeposit ? '+' : '-'}${amount.toFixed(2)}
+            </motion.p>
+            <motion.span 
+              className={`text-xs px-2 py-1 rounded-full ${
+                status === 'completed' 
+                  ? 'bg-accent/20 text-accent' 
+                  : status === 'pending'
+                  ? 'bg-yellow-500/20 text-yellow-500'
+                  : 'bg-destructive/20 text-destructive'
+              }`}
+              animate={{ opacity: status === 'pending' ? [0.7, 1, 0.7] : 1 }}
+              transition={{ duration: 2, repeat: status === 'pending' ? Infinity : 0 }}
+            >
+              {status}
+            </motion.span>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDetails(true);
+            }}
+            className="opacity-0 group-hover:opacity-100 transition-opacity"
           >
-            {isDeposit ? '+' : '-'}${amount.toFixed(2)}
-          </motion.p>
-          <motion.span 
-            className={`text-xs px-2 py-1 rounded-full ${
-              status === 'completed' 
-                ? 'bg-accent/20 text-accent' 
-                : 'bg-yellow-500/20 text-yellow-500'
-            }`}
-            animate={{ opacity: [0.7, 1, 0.7] }}
-            transition={{ duration: 2, repeat: Infinity }}
-          >
-            {status}
-          </motion.span>
+            <Info className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -139,6 +165,13 @@ const TransactionItem = ({
           )}
         </div>
       )}
+
+      {/* Transaction Details Modal */}
+      <TransactionDetailsModal 
+        transaction={props}
+        open={showDetails}
+        onOpenChange={setShowDetails}
+      />
     </motion.div>
   );
 };

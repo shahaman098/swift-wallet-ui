@@ -15,6 +15,7 @@ import SmartContractWallets from "./pages/SmartContractWallets";
 import TreasuryAutomation from "./pages/TreasuryAutomation";
 import PolicyManagement from "./pages/PolicyManagement";
 import TreasuryOperations from "./pages/TreasuryOperations";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import LegalDisclaimer from "./components/LegalDisclaimer";
 
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/treasury-automation" element={<TreasuryAutomation />} />
           <Route path="/policy-management" element={<PolicyManagement />} />
           <Route path="/treasury-operations" element={<TreasuryOperations />} />
+          <Route path="/settings" element={<Settings />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

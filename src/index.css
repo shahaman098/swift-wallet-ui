@@ -147,56 +147,57 @@ All colors MUST be HSL.
 }
 
 @layer utilities {
-  /* Liquid Glass Effect - VisionOS Style */
+  /* Liquid Glass Effect - VisionOS Style - More Transparent */
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(60px) saturate(200%);
+    -webkit-backdrop-filter: blur(60px) saturate(200%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 
-      0 8px 32px rgba(75, 111, 255, 0.15),
-      inset 0 1px 1px rgba(255, 255, 255, 0.1),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.05);
+      0 8px 32px rgba(75, 111, 255, 0.1),
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.02);
   }
   
   .dark .liquid-glass {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.4),
-      inset 0 1px 1px rgba(255, 255, 255, 0.05),
-      inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.08),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.15);
   }
   
   .liquid-glass-premium {
     background: linear-gradient(
       135deg,
-      rgba(75, 111, 255, 0.1) 0%,
-      rgba(36, 211, 238, 0.08) 50%,
-      rgba(49, 196, 141, 0.06) 100%
+      rgba(75, 111, 255, 0.06) 0%,
+      rgba(36, 211, 238, 0.04) 50%,
+      rgba(49, 196, 141, 0.03) 100%
     );
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    backdrop-filter: blur(60px) saturate(220%);
+    -webkit-backdrop-filter: blur(60px) saturate(220%);
+    border: 1px solid rgba(255, 255, 255, 0.22);
     box-shadow: 
-      0 8px 32px rgba(75, 111, 255, 0.2),
-      0 0 80px rgba(36, 211, 238, 0.1),
-      inset 0 1px 2px rgba(255, 255, 255, 0.15),
-      inset 0 -2px 4px rgba(75, 111, 255, 0.1);
+      0 8px 32px rgba(75, 111, 255, 0.12),
+      0 0 80px rgba(36, 211, 238, 0.06),
+      inset 0 1px 2px rgba(255, 255, 255, 0.2),
+      inset 0 -2px 4px rgba(75, 111, 255, 0.05);
   }
   
   .dark .liquid-glass-premium {
     background: linear-gradient(
       135deg,
-      rgba(75, 111, 255, 0.12) 0%,
-      rgba(49, 238, 243, 0.1) 50%,
-      rgba(49, 196, 141, 0.08) 100%
+      rgba(75, 111, 255, 0.08) 0%,
+      rgba(49, 238, 243, 0.06) 50%,
+      rgba(49, 196, 141, 0.04) 100%
     );
+    border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 
-      0 8px 32px rgba(75, 111, 255, 0.25),
-      0 0 80px rgba(49, 238, 243, 0.15),
-      inset 0 1px 2px rgba(255, 255, 255, 0.1),
-      inset 0 -2px 4px rgba(75, 111, 255, 0.15);
+      0 8px 32px rgba(75, 111, 255, 0.18),
+      0 0 80px rgba(49, 238, 243, 0.1),
+      inset 0 1px 2px rgba(255, 255, 255, 0.12),
+      inset 0 -2px 4px rgba(75, 111, 255, 0.1);
   }
   
   /* Shimmer Animation */
