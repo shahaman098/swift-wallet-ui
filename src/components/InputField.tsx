@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { motion } from "framer-motion";
 
 interface InputFieldProps {
   label: string;
@@ -21,8 +22,16 @@ const InputField = ({
   disabled = false 
 }: InputFieldProps) => {
   return (
-    <div className="space-y-2">
-      <Label htmlFor={label.toLowerCase().replace(/\s+/g, '-')}>
+    <motion.div 
+      className="space-y-2"
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Label 
+        htmlFor={label.toLowerCase().replace(/\s+/g, '-')}
+        className="text-sm font-semibold text-foreground"
+      >
         {label}
         {required && <span className="text-destructive ml-1">*</span>}
       </Label>
@@ -34,9 +43,9 @@ const InputField = ({
         onChange={(e) => onChange(e.target.value)}
         required={required}
         disabled={disabled}
-        className="h-12"
+        className="h-12 bg-background/50 border-border/50 focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
       />
-    </div>
+    </motion.div>
   );
 };
 

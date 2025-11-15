@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import { Wallet } from "lucide-react";
+import { motion } from "framer-motion";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -42,71 +43,126 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-elevated">
-        <CardHeader className="space-y-4 text-center">
-          <div className="mx-auto w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-            <Wallet className="h-6 w-6 text-primary-foreground" />
-          </div>
-          <div>
-            <CardTitle className="text-2xl">Create your account</CardTitle>
-            <CardDescription>Get started with PayWallet today</CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <InputField
-              label="Full Name"
-              placeholder="John Doe"
-              value={name}
-              onChange={setName}
-              required
-            />
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-[#0A0F2D] via-[#1a1f3d] to-[#0A0F2D]">
+      {/* Animated background blobs */}
+      <motion.div
+        className="absolute top-20 right-20 w-96 h-96 bg-[#31D2F7] rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+        animate={{
+          x: [0, -100, 0],
+          y: [0, 50, 0],
+          scale: [1, 1.2, 1],
+        }}
+        transition={{
+          duration: 9,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+      <motion.div
+        className="absolute bottom-20 left-20 w-96 h-96 bg-[#4A44F2] rounded-full mix-blend-multiply filter blur-3xl opacity-20"
+        animate={{
+          x: [0, 100, 0],
+          y: [0, -50, 0],
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 11,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
 
-            <InputField
-              label="Email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={setEmail}
-              required
-            />
-            
-            <InputField
-              label="Password"
-              type="password"
-              placeholder="Create a password"
-              value={password}
-              onChange={setPassword}
-              required
-            />
-
-            <InputField
-              label="Confirm Password"
-              type="password"
-              placeholder="Confirm your password"
-              value={confirmPassword}
-              onChange={setConfirmPassword}
-              required
-            />
-
-            <Button 
-              type="submit" 
-              className="w-full h-12 text-base font-semibold"
-              disabled={loading}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative z-10 w-full max-w-md"
+      >
+        <Card className="backdrop-blur-2xl bg-white/10 border border-white/20 shadow-2xl">
+          <CardHeader className="space-y-6 text-center pb-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="mx-auto w-16 h-16 bg-gradient-to-br from-[#4A44F2] to-[#31D2F7] rounded-2xl flex items-center justify-center shadow-xl"
             >
-              {loading ? <Loading text="" /> : "Create Account"}
-            </Button>
+              <Wallet className="h-8 w-8 text-white" />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              <CardTitle className="text-3xl font-bold text-white">Create account</CardTitle>
+              <CardDescription className="text-white/70 mt-2 text-base">
+                Join PayWallet today
+              </CardDescription>
+            </motion.div>
+          </CardHeader>
+          
+          <CardContent>
+            <motion.form
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              onSubmit={handleSubmit}
+              className="space-y-4"
+            >
+              <InputField
+                label="Full Name"
+                placeholder="John Doe"
+                value={name}
+                onChange={setName}
+                required
+              />
 
-            <p className="text-center text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <Link to="/login" className="text-primary hover:underline font-medium">
-                Sign in
-              </Link>
-            </p>
-          </form>
-        </CardContent>
-      </Card>
+              <InputField
+                label="Email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={setEmail}
+                required
+              />
+              
+              <InputField
+                label="Password"
+                type="password"
+                placeholder="Create a password"
+                value={password}
+                onChange={setPassword}
+                required
+              />
+
+              <InputField
+                label="Confirm Password"
+                type="password"
+                placeholder="Confirm your password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                required
+              />
+
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  type="submit" 
+                  className="w-full h-14 text-base font-bold bg-gradient-to-r from-[#4A44F2] to-[#31D2F7] hover:from-[#31D2F7] hover:to-[#4A44F2] border-0 shadow-xl mt-2"
+                  disabled={loading}
+                >
+                  {loading ? <Loading text="" /> : "Create Account"}
+                </Button>
+              </motion.div>
+
+              <p className="text-center text-sm text-white/70">
+                Already have an account?{" "}
+                <Link to="/login" className="text-[#31D2F7] hover:text-[#4A44F2] font-semibold transition-colors">
+                  Sign in
+                </Link>
+              </p>
+            </motion.form>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
 };
