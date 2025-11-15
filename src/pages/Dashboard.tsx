@@ -9,6 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import { TrendingUp, Activity, PieChartIcon } from "lucide-react";
+import { walletAPI, activityAPI } from "@/api/client";
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 interface Transaction {
   id: string;
@@ -55,35 +57,45 @@ const Dashboard = () => {
       return;
     }
 
-    // Simulate API call
-    setTimeout(() => {
-      setBalance(1234.56);
-      setTransactions([
-        {
-          id: '1',
-          type: 'deposit',
-          amount: 500.00,
-          date: 'Today, 2:30 PM',
-          status: 'completed',
-        },
-        {
-          id: '2',
-          type: 'send',
-          amount: 150.00,
-          recipient: 'John Smith',
-          date: 'Yesterday, 4:15 PM',
-          status: 'completed',
-        },
-        {
-          id: '3',
-          type: 'deposit',
-          amount: 1000.00,
-          date: 'Dec 10, 10:00 AM',
-          status: 'completed',
-        },
-      ]);
-      setLoading(false);
-    }, 800);
+    const fetchData = async () => {
+      try {
+        // Fetch balance and transactions in parallel
+        const [balanceResponse, activityResponse] = await Promise.all([
+          walletAPI.getBalance(),
+          activityAPI.getActivity({ limit: 20 })
+        ]);
+
+        setBalance(balanceResponse.data.balance);
+        
+        // Format transactions for display
+        const formattedTransactions: Transaction[] = activityResponse.data.transactions.map((tx: any) => {
+          const date = parseISO(tx.createdAt);
+          const dateStr = formatDistanceToNow(date, { addSuffix: true });
+          
+          return {
+            id: tx.id,
+            type: tx.type,
+            amount: tx.amount,
+            recipient: tx.recipient,
+            date: dateStr,
+            status: 'completed' as const,
+          };
+        });
+
+        setTransactions(formattedTransactions);
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+        // If auth fails, redirect to login
+        if ((error as any)?.response?.status === 401) {
+          navigate('/login');
+          return;
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [navigate]);
 
   return (

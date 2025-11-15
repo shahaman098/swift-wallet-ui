@@ -7,6 +7,7 @@ import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import { Wallet } from "lucide-react";
 import { motion } from "framer-motion";
+import { authAPI } from "@/api/client";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -31,15 +32,39 @@ const Signup = () => {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      localStorage.setItem('authToken', 'demo-token-' + Date.now());
+    try {
+      const response = await authAPI.signup({ name, email, password });
+      const token = response?.data?.token;
+
+      if (token) {
+        localStorage.setItem("authToken", token);
+      }
+    
       toast({
         title: "Account created",
-        description: "Welcome to PayWallet!",
+        description: response?.data?.message || "Welcome to PayWallet!",
       });
-      navigate('/dashboard');
-    }, 1000);
+      
+      navigate("/dashboard");
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string } };
+        message?: string;
+      };
+
+      const description =
+        axiosError.response?.data?.message ||
+        axiosError.message ||
+        "Unable to create account. Please try again.";
+
+      toast({
+        title: "Signup failed",
+        description,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

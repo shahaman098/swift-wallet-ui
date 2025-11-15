@@ -7,6 +7,7 @@ import InputField from "@/components/InputField";
 import Loading from "@/components/Loading";
 import { Wallet } from "lucide-react";
 import { motion } from "framer-motion";
+import { authAPI } from "@/api/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -19,15 +20,42 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      localStorage.setItem('authToken', 'demo-token-' + Date.now());
+    try {
+      const response = await authAPI.login({ email, password });
+      const token = response?.data?.token;
+
+      if (token) {
+        localStorage.setItem("authToken", token);
+      }
+
+      // Check if this was a new account (status 201) or existing login (status 200)
+      const isNewAccount = response?.status === 201;
+      
       toast({
-        title: "Login successful",
-        description: "Welcome back!",
+        title: isNewAccount ? "Account created!" : "Login successful",
+        description: response?.data?.message || (isNewAccount ? "Welcome to PayWallet!" : "Welcome back!"),
       });
-      navigate('/dashboard');
-    }, 1000);
+      
+      navigate("/dashboard");
+    } catch (error) {
+      const axiosError = error as {
+        response?: { data?: { message?: string }; status?: number };
+        message?: string;
+      };
+
+      const description =
+        axiosError.response?.data?.message ||
+        axiosError.message ||
+        "Unable to sign in. Please try again.";
+
+      toast({
+        title: "Sign in failed",
+        description,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

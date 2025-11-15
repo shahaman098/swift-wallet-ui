@@ -11,6 +11,7 @@ import SendPayment from "./pages/SendPayment";
 import SplitPayment from "./pages/SplitPayment";
 import RequestPayment from "./pages/RequestPayment";
 import PaymentRequestView from "./pages/PaymentRequestView";
+import TreasuryBrain from "./pages/TreasuryBrain";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/send-payment" element={<SendPayment />} />
           <Route path="/split-payment" element={<SplitPayment />} />
           <Route path="/request-payment" element={<RequestPayment />} />
+          <Route path="/treasury" element={<TreasuryBrain />} />
           <Route path="/pay/:requestId" element={<PaymentRequestView />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
