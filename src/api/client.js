@@ -1,8 +1,39 @@
 import axios from 'axios';
 
+function normalizeBaseUrl(url) {
+  if (!url) {
+    return undefined;
+  }
+
+  return url.replace(/\/$/, '');
+}
+
+function resolveBaseUrl() {
+  const envBaseUrl = normalizeBaseUrl(import.meta.env.VITE_API_URL);
+  if (envBaseUrl) {
+    return envBaseUrl;
+  }
+
+  const isBrowser = typeof window !== 'undefined';
+  if (isBrowser) {
+    const { origin, protocol } = window.location;
+
+    // When the UI is served over HTTPS we must avoid hard-coding an HTTP backend
+    // URL because browsers will block the mixed-content request. In this case we
+    // default to the current origin so the frontend and backend share the same
+    // scheme and host.
+    if (protocol === 'https:' || !import.meta.env.DEV) {
+      return normalizeBaseUrl(origin);
+    }
+  }
+
+  // Default development fallback when running the API locally
+  return 'http://localhost:3000';
+}
+
 // Create axios instance with default config
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000',
+  baseURL: resolveBaseUrl(),
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
