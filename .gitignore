@@ -1,3 +1,35 @@
+# Environment
+.env
+*.env
+.env.local
+
+# Circle Secrets
+circle-entity-secret-recovery.json
+recovery_file_*.dat
+
+# Node dependencies
+node_modules/
+dist/
+build/
+.cache/
+logs/
+
+# System files
+.DS_Store
+
+# Hardhat/Forge contract artifacts
+artifacts/
+cache/
+**/artifacts/
+**/cache/
+
+# Keys
+*.key
+*.pem
+
+# Vite/TypeScript
+*.tsbuildinfo
+
 # Ignore problematic submodule folder
 hello-arc/
 
