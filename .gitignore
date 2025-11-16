@@ -1,2 +1,5 @@
 # Ignore problematic submodule folder
 hello-arc/
+
+# Ignore large archives
+*.zip
