@@ -1,0 +1,18 @@
+import dotenv from "dotenv";
+import { validateEnv } from "../utils/validateEnv";
+
+dotenv.config();
+
+export const env = {
+  circleApiKey: validateEnv("CIRCLE_API_KEY")!,
+  entitySecretOverride: validateEnv("CIRCLE_WALLET_ENTITY_SECRET", undefined, {
+    optional: true,
+  }),
+  circleApiBase: validateEnv("CIRCLE_API_BASE", "https://api.circle.com/v1")!,
+  mongoUri: validateEnv("MONGODB_URI")!,
+  jwtSecret: validateEnv("JWT_SECRET")!,
+  port: validateEnv("PORT", "5000")!,
+  frontendUrl: validateEnv("FRONTEND_URL", "http://localhost:5173")!,
+  nodeEnv: process.env.NODE_ENV ?? "development",
+};
+

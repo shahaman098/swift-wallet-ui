@@ -1,0 +1,362 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Liquid Glass Design System - Black/White/Gray Only */
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --text-primary: rgba(255, 255, 255, 0.9);
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 0 0% 30%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 0% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 0 0% 40%;
+    --success-foreground: 0 0% 100%;
+
+    --border: 0 0% 25%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 50%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 25%;
+    --sidebar-ring: 0 0% 50%;
+    
+    --blur-glass: blur(12px);
+    --transition-smooth: all 0.25s ease-out;
+  }
+
+  .dark {
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --text-primary: rgba(255, 255, 255, 0.9);
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 30%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 0% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 0 0% 40%;
+    --success-foreground: 0 0% 100%;
+    --border: 0 0% 25%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 50%;
+    --radius: 1rem;
+    --sidebar-background: 0 0% 5%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 25%;
+    --sidebar-ring: 0 0% 50%;
+    --blur-glass: blur(12px);
+    --transition-smooth: all 0.25s ease-out;
+  }
+}
+
+/* Glassmorphic animated background - Gray Only */
+.bg-shapes {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  background: #000000;
+}
+
+.bg-shapes .shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: float 20s infinite ease-in-out;
+}
+
+.bg-shapes .shape:nth-child(1) {
+  width: 300px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.05);
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.bg-shapes .shape:nth-child(2) {
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.03);
+  bottom: 10%;
+  right: 10%;
+  animation-delay: -7s;
+}
+
+.bg-shapes .shape:nth-child(3) {
+  width: 250px;
+  height: 250px;
+  background: rgba(255, 255, 255, 0.04);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: -14s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 30px) scale(0.9);
+  }
+}
+
+/* Glass button styles - Gray Only */
+.glass-button {
+  position: relative;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 
+    0 8px 32px 0 rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 0 rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.25s ease-out;
+  overflow: hidden;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 48px 0 rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.15);
+}
+
+.glass-button:active {
+  transform: translateY(0) scale(0.98);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.glass-button .button-text {
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.5px;
+}
+
+/* Ripple animation for GlassButton */
+.glass-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0);
+  animation: glass-ripple-animation 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes glass-ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-inter antialiased;
+  }
+}
+
+@layer utilities {
+  /* Liquid Glass Effect - Pure Black/White/Gray */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 20px;
+    color: var(--text-primary);
+  }
+  
+  .liquid-glass {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+  }
+  
+  .liquid-glass-premium {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.1),
+      inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Fade In Animation */
+  .fade-in {
+    animation: fadeIn 0.25s ease-out;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  /* Shimmer Animation - Gray Only */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.05) 50%,
+      transparent 100%
+    );
+    animation: shimmer-slide 8s ease-in-out infinite;
+  }
+  
+  @keyframes shimmer-slide {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+  }
+  
+  /* Text - White/Gray Only */
+  .text-gradient {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  .text-arc-gradient {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  
+  /* Hover Lift Effect - Gray Only */
+  .hover-lift {
+    transition: transform 0.25s ease-out, box-shadow 0.25s ease-out;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 
+      0 20px 60px rgba(0, 0, 0, 0.5),
+      inset 0 1px 2px rgba(255, 255, 255, 0.15);
+  }
+  
+  /* Ripple Effect */
+  @keyframes ripple {
+    0% {
+      transform: scale(0);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+  
+  .ripple-effect {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .ripple-effect::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    pointer-events: none;
+  }
+  
+  .ripple-effect:active::after {
+    animation: ripple 0.6s ease-out;
+  }
+}

@@ -1,0 +1,13 @@
+<svg width="32" height="32" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <!-- Simple stylized Arc "A" mark formed by an arc and pillar -->
+  <defs>
+    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" ry="14" fill="url(#g)" opacity="0.12"/>
+  <path d="M10 44c0-12.15 9.85-22 22-22s22 9.85 22 22" fill="none" stroke="url(#g)" stroke-width="6" stroke-linecap="round"/>
+  <path d="M32 22v20" stroke="url(#g)" stroke-width="6" stroke-linecap="round"/>
+</svg>
+
